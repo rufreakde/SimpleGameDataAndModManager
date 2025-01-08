@@ -13,13 +13,27 @@ type Dictionary = {
   [key: string]: NodeData | StringDictKVs | null;
 };
 
+interface Schema {
+  name: string;
+  path: string;
+}
+
+interface ExtendedNodeData extends NodeData {
+  path?: string;
+  isFolder?: boolean;
+  jsonSchema?: Schema;
+  instanceData?: any;
+}
+
 type StringDictKVs = {
   [key: string]: string
 }
 
-const emptyNodeData = (nameOfList: string) : NodeData => {
+const emptyFolderNodeData = (nameOfList: string) : ExtendedNodeData => {
   return {
     name: nameOfList,
+    path: 'NA',
+    isFolder: true,
     checked: 0,   // half check: some children are checked
     isOpen: true,   // this folder is opened, we can see it's children
     children: [
@@ -34,8 +48,8 @@ async function getSettings() {
     'paths': {
         'root': `${app.getAppPath()}`
     },
-    'game': emptyNodeData("game"),
-    'mods': emptyNodeData("mods"),
+    'game': emptyFolderNodeData("game"),
+    'mods': emptyFolderNodeData("mods"),
     'schemas': {},
   }
 
@@ -72,12 +86,12 @@ async function loadJSON(filename: string) {
   return json.default;
 }
 
-function AddChildAt(parentsInDepth: NodeData[], childToAdd: NodeData, depth: number){
+function AddChildAt(parentsInDepth: ExtendedNodeData[], childToAdd: ExtendedNodeData, depth: number){
 
 
 
   // see itself continue
-  const foundItselfIndex = parentsInDepth[depth-1].children!.findIndex( (value: NodeData) => { 
+  const foundItselfIndex = parentsInDepth[depth-1].children!.findIndex( (value: ExtendedNodeData) => { 
     return value.name === childToAdd.name
   })
   if(foundItselfIndex !== -1){
@@ -94,12 +108,12 @@ function AddChildAt(parentsInDepth: NodeData[], childToAdd: NodeData, depth: num
     
 }
 
-function getTree(directoryPath: string, files: string[] = [], filterKeyword: string): NodeData {
+function getTree(directoryPath: string, files: string[] = [], filterKeyword: string): ExtendedNodeData {
 
   const isWindows = os.platform() === "win32";
   const pathDelimiter = isWindows ? "\\" : "/";
 
-  const tree: NodeData = emptyNodeData("root");
+  const tree: NodeData = emptyFolderNodeData("root");
   // Get an array of all files and directories in the passed directory using fs.readdirSync
   const schemas = filehandling.getJsonSchemaFileHandles(directoryPath);
   //const directoryList = filehandling.getAllDirectories(directoryPath  + "/Content");
@@ -113,7 +127,7 @@ function getTree(directoryPath: string, files: string[] = [], filterKeyword: str
 
   for (const file of Array.from(instances)) {
 
-    let parentsInDepth: NodeData[] = [];
+    let parentsInDepth: ExtendedNodeData[] = [];
     parentsInDepth.push(tree);
 
     const foldersBeginning = file.parentPath.split("Content");
@@ -127,11 +141,11 @@ function getTree(directoryPath: string, files: string[] = [], filterKeyword: str
     folders[0] = "Content";
     let DepthCounter = 1;
     for (const folder of folders){
-      const childFolder = newChildFolderNode(folder)
+      const childFolder = newChildFolderNode(folder, TODO PATH) // TODO construct the folder paths so that we dont loose filesystem references makes it simpler later
       AddChildAt(parentsInDepth, childFolder, DepthCounter)
       DepthCounter++;
     }
-    const childInstance = newChildFileNode(file.name)
+    const childInstance = newChildFileNode(file.name, file.parentPath)
     AddChildAt(parentsInDepth,  childInstance, DepthCounter)
   }
 
@@ -145,7 +159,9 @@ function getSchemas(path: string) : StringDictKVs | null{
   const schemas: string[] = [];
   const tree = getTree(path, schemas, 'schema') // changes schemas value by reference from param
 
-  // TODO make schemas correct this is not so easy but test also if the finding of the schema files is working.
+  // TODO write a function to make the tree simpler to use currently it is to hard traverse!
+  // better extend the NodeData datastructure
+  // should also store path and data within the NodeData maybe to make handling simpler.
   tree.forEach(schema => {
     const file = loadJSON(schema)
     schemasDict[schema] = file
@@ -153,13 +169,15 @@ function getSchemas(path: string) : StringDictKVs | null{
   return schemasDict
 }
 
-function newChildFileNode(fileName: string) :NodeData {
-  return  { name: fileName, checked: 0 }
+function newChildFileNode(fileName: string, path: string) :ExtendedNodeData {
+  return  { name: fileName, isFolder: false, path: path, checked: 0 }
 }
 
-function newChildFolderNode(folderName: string) :NodeData{
+function newChildFolderNode(folderName: string, path: string) :ExtendedNodeData{
   return     {
     name: folderName,
+    isFolder: true,
+    path: path,
     checked: 0,
     isOpen: true,
     children: [],
