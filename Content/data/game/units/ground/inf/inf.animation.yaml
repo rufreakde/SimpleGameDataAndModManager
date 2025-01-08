@@ -1,0 +1,87 @@
+type: animation
+path: ./Content/data/units/ground/inf
+spriteInfo:
+  sizeInPixelXY: 64
+  countMaximum:
+    x: 3
+    y: 3
+  templateTeamColor1:
+    r: 41
+    g: 33
+    b: 198
+    a: 255
+  templateTeamColor2:
+    r: 0
+    g: 107
+    b: 239
+    a: 255
+  templateTeamColor3:
+    r: 66
+    g: 189
+    b: 247
+    a: 255
+  templateTeamColorHighlight:
+    r: 107
+    g: 231
+    b: 255
+    a: 255
+  forceToTransparentColor:
+    r: 140
+    g: 181
+    b: 123
+    a: 255
+animations:
+  "WalkLeft":
+    effekt: none
+    flipped: no
+    fpsSpeed: 10
+    chosenInOrder:
+      - 0
+      - 1
+      - 2
+  "WalkRight":
+    effekt: none
+    flipped: horizontal
+    fpsSpeed: 10
+    chosenInOrder:
+      - 0
+      - 1
+      - 2
+  "WalkDown":
+    effekt: none
+    flipped: no
+    fpsSpeed: 10
+    chosenInOrder:
+      - 3
+      - 4
+      - 5
+  "WalkUp":
+    effekt: none
+    flipped: no
+    fpsSpeed: 10
+    chosenInOrder:
+      - 6
+      - 7
+      - 8
+  "Die":
+    effekt: explosion
+    flipped: no
+    fpsSpeed: 10
+    chosenInOrder:
+      - 6
+      - 6
+      - 6
+  "GetHit":
+    effekt: hit
+    flipped: no
+    fpsSpeed: 10
+    chosenInOrder:
+      - 3
+      - 3
+      - 3
+  "Idle":
+    effekt: none
+    flipped: no
+    fpsSpeed: 10
+    chosenInOrder:
+      - 1

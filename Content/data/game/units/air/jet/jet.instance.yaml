@@ -1,0 +1,29 @@
+type: unit
+path: ./Content/data/units/air/jet
+name: Jet
+productionClass: air #air ground water
+invincibility: false
+luckModifier: 10
+weapons:
+  "jet-missiles": # key to match to weapon dictonary for damage values
+    primary: true
+    possibleTargets: # overwrites what can be hit with that kind of weapon
+      air: true
+      ground: false
+  "jet-machine-guns": # key to match to weapon dictonary for damage values
+    primary: false
+    possibleTargets: # overwrites what can be hit with that kind of weapon
+      air: true
+      ground: false
+armor:
+  key: jet-armor
+movement:
+  can:
+    walkDrive: false
+    swim: false
+    fly: true
+  baseSpeed: 5
+  modifiers:
+    weight: light # light,medium,heavy
+    tires: none # gummi-air,gummi-full,armored-chain,amphibious,walking-robot
+
