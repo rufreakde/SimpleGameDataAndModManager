@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -8,6 +8,7 @@ import * as os from "os";
 
 import * as fs from 'fs';
 import path from 'path'
+import { parse } from 'yaml'
 
 type Dictionary = {
   [key: string]: NodeData | StringDictKVs | null;
@@ -16,6 +17,7 @@ type Dictionary = {
 interface Schema {
   name: string;
   path: string;
+  referenceData: any;
 }
 
 interface ExtendedNodeData extends NodeData {
@@ -48,9 +50,7 @@ async function getSettings() {
     'paths': {
         'root': `${app.getAppPath()}`
     },
-    'game': emptyFolderNodeData("game"),
-    'mods': emptyFolderNodeData("mods"),
-    'schemas': {},
+    'tree':  emptyFolderNodeData("root"),
   }
 
   if (!settings.paths ){
@@ -58,9 +58,7 @@ async function getSettings() {
     return settings
   }
 
-  settings.schemas = getSchemas(settings.paths.root )
-  settings.game = setAlreadyExistingInstance(settings.paths.root, 'game');
-  settings.mods = setAlreadyExistingInstance(settings.paths.root, 'mods');
+  settings.tree = await getTree( settings.paths.root )
 
   return settings;
 }
@@ -78,17 +76,27 @@ const filehandling = {
   isDirectory: (path: string): boolean => fs.lstatSync(path).isDirectory(),
 };
 
-async function loadJSON(filename: string) {
-  const json = await import(filename, {
-    with: { type: 'json' },
-  });
- 
-  return json.default;
+// function saveJSONData(data, filePath) {
+//   const text = JSON.stringify(data)
+//   fs.writeFileSync(filePath, text);
+// }
+
+function loadJSONData(filePath) {
+  const buffer = fs.readFileSync(filePath, 'utf8');
+  return JSON.parse(buffer)
+}
+
+// function saveYAMLData(data, filePath) {
+//   const text = stringify(data)
+//   fs.writeFileSync(filePath, text);
+// }
+
+function loadYAMLData(filePath) {
+  const buffer = fs.readFileSync(filePath, 'utf8');
+  return parse(buffer)
 }
 
 function AddChildAt(parentsInDepth: ExtendedNodeData[], childToAdd: ExtendedNodeData, depth: number){
-
-
 
   // see itself continue
   const foundItselfIndex = parentsInDepth[depth-1].children!.findIndex( (value: ExtendedNodeData) => { 
@@ -108,10 +116,11 @@ function AddChildAt(parentsInDepth: ExtendedNodeData[], childToAdd: ExtendedNode
     
 }
 
-function getTree(directoryPath: string, files: string[] = [], filterKeyword: string): ExtendedNodeData {
+async function getTree(directoryPath: string): Promise<ExtendedNodeData> {
 
   const isWindows = os.platform() === "win32";
   const pathDelimiter = isWindows ? "\\" : "/";
+  const schemasDict: StringDictKVs | any= {};
 
   const tree: NodeData = emptyFolderNodeData("root");
   // Get an array of all files and directories in the passed directory using fs.readdirSync
@@ -121,8 +130,9 @@ function getTree(directoryPath: string, files: string[] = [], filterKeyword: str
   // Create the full path of the file/directory by concatenating the passed directory and file/directory name
 
   // match each instance to a schema
-  for (const file of Array.from(schemas)) {
-
+  for (const fileHandle of Array.from(schemas)) {
+    const file = await loadJSONData( path.join(fileHandle.parentPath ,fileHandle.name))
+    schemasDict[fileHandle.name] = file;
   }
 
   for (const file of Array.from(instances)) {
@@ -141,36 +151,71 @@ function getTree(directoryPath: string, files: string[] = [], filterKeyword: str
     folders[0] = "Content";
     let DepthCounter = 1;
     for (const folder of folders){
-      const childFolder = newChildFolderNode(folder, TODO PATH) // TODO construct the folder paths so that we dont loose filesystem references makes it simpler later
+      const childFolder = newChildFolderNode(folder, `TODO PATH`) // TODO construct the folder paths so that we dont loose filesystem references makes it simpler later
       AddChildAt(parentsInDepth, childFolder, DepthCounter)
       DepthCounter++;
     }
-    const childInstance = newChildFileNode(file.name, file.parentPath)
-    AddChildAt(parentsInDepth,  childInstance, DepthCounter)
+    const childInstanceMatchedSchema = await findSchemaByChildParentFolder(schemasDict, file, pathDelimiter);
+    const childInstanceData = await loadYAMLData( path.join(file.parentPath, file.name))
+    const childInstance = newChildFileNode(file.name, file.parentPath, childInstanceData, childInstanceMatchedSchema.name, childInstanceMatchedSchema.path, childInstanceMatchedSchema.referenceData);
+    AddChildAt(parentsInDepth,  childInstance, DepthCounter);
   }
 
   return tree
 }
 
-// find all files with the following nameing scheme:
-// *schema.json
-function getSchemas(path: string) : StringDictKVs | null{
-  const schemasDict: StringDictKVs | any= {};
-  const schemas: string[] = [];
-  const tree = getTree(path, schemas, 'schema') // changes schemas value by reference from param
+async function findSchemaByChildParentFolder(schemasDict: StringDictKVs | any, instanceFileInfo: fs.Dirent, pathDelimiter ) : Promise<Schema> {
+  // from the path find the parent folder and use that as key to get the schema
+  const folders = instanceFileInfo.parentPath.split(pathDelimiter);
+  const schemaKeys = Object.keys(schemasDict)
 
-  // TODO write a function to make the tree simpler to use currently it is to hard traverse!
-  // better extend the NodeData datastructure
-  // should also store path and data within the NodeData maybe to make handling simpler.
-  tree.forEach(schema => {
-    const file = loadJSON(schema)
-    schemasDict[schema] = file
-  });
-  return schemasDict
+  const nameSplitByDot = instanceFileInfo.name.split(".");
+  const fileTypeSchemaSuffix = nameSplitByDot[nameSplitByDot.length-2]
+
+  const schemaKey = schemaKeys.find( ( key ) => { 
+
+    const folderKey = folders.find( ( folder ) => { 
+      const schemaKey = schemaKeys.find( 
+        (key) =>{ 
+          return folder.includes( key.split(".")[0] ) 
+        } 
+      )?.split(".")[0]
+    
+      return folder.includes(schemaKey || "not found");
+    })
+    const removedPlural = folderKey?.slice(0, -1) || "not found"
+    return key.includes(removedPlural) && key.includes(fileTypeSchemaSuffix) 
+  } )
+
+  if ( schemaKey ){
+    return {
+      name: schemaKey,
+      path: "NOT IMPLEMENTED YET",
+      referenceData : schemasDict[schemaKey]
+  
+    }
+  }
+
+  return {
+    name: "Not Found",
+    path: "NOT IMPLEMENTED YET",
+    referenceData : schemasDict[0]
+
+  } // fallback
 }
 
-function newChildFileNode(fileName: string, path: string) :ExtendedNodeData {
-  return  { name: fileName, isFolder: false, path: path, checked: 0 }
+function newChildFileNode(fileName: string, path: string, instanceData:any, schemaName: string, schemaPath: string, schemaData: any) :ExtendedNodeData {
+  return  { 
+    name: fileName, 
+    isFolder: false, 
+    path: path, 
+    instanceData: instanceData,
+    jsonSchema: { 
+      name: schemaName, 
+      path: schemaPath, 
+      referenceData: schemaData}, 
+      checked: 0 
+    }
 }
 
 function newChildFolderNode(folderName: string, path: string) :ExtendedNodeData{
@@ -183,12 +228,6 @@ function newChildFolderNode(folderName: string, path: string) :ExtendedNodeData{
     children: [],
   }
 }
-
-function setAlreadyExistingInstance(path: string, modOrGame: string) : NodeData | null {
-  //_settings[modOrGame]?.children[]
-  return null
-}
-
 
 
 function createWindow(): void {

@@ -26,7 +26,8 @@
     "@rjsf/core": "^5.23.2",
     "@rjsf/validator-ajv8": "^5.23.2",
     "electron-updater": "^6.1.7",
-    "react-folder-tree": "^5.1.1"
+    "react-folder-tree": "^5.1.1",
+    "yaml": "^2.7.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
