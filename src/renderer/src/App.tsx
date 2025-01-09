@@ -5,11 +5,13 @@ import { RJSFSchema } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 
 import FolderTree, { NodeData } from 'react-folder-tree';
+import { Dictionary, ExtendedNodeData } from '../../main/tree'
+import { useState } from 'react';
 
 const btnRefreshId = "btnRefreshSettings";
 const textRootPath = "rootPath";
 
-let settings = null
+let settings: Dictionary;
 
 const schema: RJSFSchema = {
   "title": "Files",
@@ -36,60 +38,21 @@ const schema: RJSFSchema = {
   }
 };
 
-const GameData: NodeData = {
-  name: 'game',
-  checked: 0,   // half check: some children are checked
-  isOpen: true,   // this folder is opened, we can see it's children
-  children: [
-    {
-      name: 'Units',
-      checked: 0,
-      isOpen: true,
-      children: [
-        { name: 'Infantry', checked: 0 },
-        { name: 'Tank', checked: 0 },
-      ],
-    },
-    {
-      name: 'Buildings',
-      checked: 0,
-      isOpen: true,
-      children: [
-        { name: 'Factory', checked: 0 },
-        { name: 'City', checked: 0 },
-      ],
-    },
-  ],
-};
-
-const ModsData: NodeData = {
-  name: 'mods',
-  checked: 0,   // half check: some children are checked
-  isOpen: true,   // this folder is opened, we can see it's children
-  children: [
-    {
-      name: 'Units',
-      checked: 0,
-      isOpen: false,
-      children: [
-      ],
-    },
-    {
-      name: 'Buildings',
-      checked: 0,
-      isOpen: false,
-      children: [
-      ],
-    },
-  ],
-};
-
-
-
 function App(): JSX.Element {
+  const [treeState, setTreeState] = useState<ExtendedNodeData>({
+    name: 'root',
+    checked: 0,   // half check: some children are checked
+    isOpen: true,   // this folder is opened, we can see it's children
+    children: [
+    ],
+  });
+
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
-  const onTreeStateChange = (state: NodeData, event: unknown) => console.log(state, event);
+  const onTreeStateChange = (state: ExtendedNodeData, event: unknown) => {
+    console.log(state, event);
+    //setTreeState(state);
+  }
 
   const onRefreshClick = () => {
     window["electronAPI"].settings().then(
@@ -99,8 +62,11 @@ function App(): JSX.Element {
           filePathElement.innerText = val.paths.root;
           settings = val
         }
+
+        setTreeState(settings.tree as ExtendedNodeData)
       }
     )
+
     alert("Reloaded from Filesystem")
   }
 
@@ -110,7 +76,7 @@ function App(): JSX.Element {
 
   const onNameClick = (opts: {
     defaultOnClick: () => void;
-    nodeData: NodeData;
+    nodeData: ExtendedNodeData;
   }) => {
     opts.defaultOnClick();
 
@@ -122,26 +88,18 @@ function App(): JSX.Element {
     } = opts.nodeData;
 
     console.log(`CLICKED on ${name}:${path}:${isChecked}:${isOpen}`);
+    console.log(opts.nodeData);
   };
 
   return (
     <>
       <div className="container">
         <div className='leftSidebar'>
-          <div className='padding10px'>
+          <div id="treeView" className='padding10px'>
             <FolderTree
               showCheckbox={false}
               indentPixels={15}
-              data={GameData}
-              onChange={onTreeStateChange}
-              onNameClick={onNameClick}
-            />
-          </div>
-          <div className='padding10px'>
-            <FolderTree
-              showCheckbox={false}
-              indentPixels={15}
-              data={ModsData}
+              data={treeState}
               onChange={onTreeStateChange}
               onNameClick={onNameClick}
             />
