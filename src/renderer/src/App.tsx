@@ -4,11 +4,10 @@ import Form from '@rjsf/core';
 import { RJSFSchema } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 
-import FolderTree, { NodeData } from 'react-folder-tree';
+import FolderTree from 'react-folder-tree';
 import { Dictionary, ExtendedNodeData } from '../../main/tree'
 import { useState } from 'react';
 
-const btnRefreshId = "btnRefreshSettings";
 const textRootPath = "rootPath";
 
 let settings: Dictionary;
@@ -41,8 +40,6 @@ const schema: RJSFSchema = {
 function App(): JSX.Element {
   const [treeState, setTreeState] = useState<ExtendedNodeData>({
     name: 'root',
-    checked: 0,   // half check: some children are checked
-    isOpen: true,   // this folder is opened, we can see it's children
     children: [
     ],
   });
@@ -74,6 +71,15 @@ function App(): JSX.Element {
     alert("Saved To Filesystem")
   }
 
+
+// export interface NodeData {
+//   checked?: Checked;
+//   children?: Array<NodeData>;
+//   isOpen?: boolean;
+//   name: string;
+//   [key: string]: any;
+// }
+
   const onNameClick = (opts: {
     defaultOnClick: () => void;
     nodeData: ExtendedNodeData;
@@ -82,13 +88,12 @@ function App(): JSX.Element {
 
     const {
       // internal data
-      path, name, isChecked, isOpen,
+      path, name, checked, isOpen,
       // custom data
-      url, ...whateverRest
+      ...customDataHolder
     } = opts.nodeData;
 
-    console.log(`CLICKED on ${name}:${path}:${isChecked}:${isOpen}`);
-    console.log(opts.nodeData);
+    console.log(`CLICKED on ${name}:${path}:${checked}:${isOpen}`);
   };
 
   return (
@@ -98,7 +103,7 @@ function App(): JSX.Element {
           <div id="treeView" className='padding10px'>
             <FolderTree
               showCheckbox={false}
-              indentPixels={15}
+              indentPixels={8}
               data={treeState}
               onChange={onTreeStateChange}
               onNameClick={onNameClick}
