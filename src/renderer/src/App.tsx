@@ -1,137 +1,162 @@
 import Versions from './components/Versions'
 
-import Form from '@rjsf/core';
-import { RJSFSchema } from '@rjsf/utils';
-import validator from '@rjsf/validator-ajv8';
+import Form, { IChangeEvent } from '@rjsf/core'
+import validator from '@rjsf/validator-ajv8'
 
-import FolderTree from 'react-folder-tree';
+import FolderTree from 'react-folder-tree'
 import { Dictionary, ExtendedNodeData } from '../../main/tree'
-import { useState } from 'react';
+import { HiDocument, HiOutlineXMark } from 'react-icons/hi2'
+import { useState } from 'react'
+import { IconComponents } from 'react-folder-tree'
 
-const textRootPath = "rootPath";
+const textRootPath = 'rootPath'
 
-let settings: Dictionary;
-
-const schema: RJSFSchema = {
-  "title": "Files",
-  "type": "object",
-  "properties": {
-    "file": {
-      "type": "string",
-      "format": "data-url",
-      "title": "Single file"
-    },
-    "files": {
-      "type": "array",
-      "title": "Multiple files",
-      "items": {
-        "type": "string",
-        "format": "data-url"
-      }
-    },
-    "filesAccept": {
-      "type": "string",
-      "format": "data-url",
-      "title": "Single File with Accept attribute"
-    }
-  }
-};
+let settings: Dictionary
 
 function App(): JSX.Element {
+  const customIcons: IconComponents = {
+    FileIcon: customFileIcon,
+    CancelIcon: customCancelIcon
+  }
+
+  function customFileIcon({ onClick: defaultOnClick, nodeData }) {
+    const { path, name, checked, isOpen, url, ...restData } = nodeData
+    const handleClick = () => {
+      defaultOnClick()
+    }
+
+    return <HiDocument onClick={handleClick} />
+  }
+
+  function customCancelIcon({ onClick: defaultOnClick, nodeData }) {
+    const { path, name, checked, isOpen, url, ...restData } = nodeData
+    const handleClick = () => {
+      console.log('icon clicked:', { path, name, url, ...restData })
+      defaultOnClick()
+    }
+
+    return <HiOutlineXMark onClick={handleClick} />
+  }
+
+  let isFormVisible = true
   const [treeState, setTreeState] = useState<ExtendedNodeData>({
     name: 'root',
-    children: [
-    ],
-  });
+    children: [],
+    customDataHolder: {
+      jsonSchema: {
+        schemaName: 'currentlyChosenSchema',
+        fullFolderPath: 'initial',
+        referenceData: {}
+      }
+    }
+  })
 
-  const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
+  // const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
   const onTreeStateChange = (state: ExtendedNodeData, event: unknown) => {
-    console.log(state, event);
-    //setTreeState(state);
+    // whenever the tree changes not the selection state of children. (e.g. fold out)
+    console.log(`${state} + ${event}`)
   }
 
   const onRefreshClick = () => {
-    window["electronAPI"].settings().then(
-      val => {
-        const filePathElement = document.getElementById(textRootPath)
-        if (filePathElement != null) {
-          filePathElement.innerText = val.paths.root;
-          settings = val
-        }
-
-        setTreeState(settings.tree as ExtendedNodeData)
+    window['electronAPI'].settings().then((val: Dictionary) => {
+      const filePathElement = document.getElementById(textRootPath)
+      if (filePathElement != null) {
+        filePathElement.innerText = val.paths.root
+        settings = val
       }
-    )
 
-    alert("Reloaded from Filesystem")
+      setTreeState(settings.tree as ExtendedNodeData)
+    })
   }
 
   const onSaveClick = () => {
-    alert("Saved To Filesystem")
+    alert('Saved To Filesystem')
   }
 
+  const customLog = (type) => console.log.bind(console, type)
 
-// export interface NodeData {
-//   checked?: Checked;
-//   children?: Array<NodeData>;
-//   isOpen?: boolean;
-//   name: string;
-//   [key: string]: any;
-// }
+  const onFormChange = (a: any, b: any) => {
+    return console.log('Form Data changed: ', a)
+  }
 
-  const onNameClick = (opts: {
-    defaultOnClick: () => void;
-    nodeData: ExtendedNodeData;
-  }) => {
-    opts.defaultOnClick();
+  const onSubmit = (a: any, b: any) => {
+    return console.log('Form Data submitted: ', a)
+  }
 
+  const onNameClick = (opts: { defaultOnClick: () => void; nodeData: ExtendedNodeData }) => {
     const {
       // internal data
-      path, name, checked, isOpen,
+      path,
+      name,
+      checked,
+      isOpen,
+      children,
       // custom data
-      ...customDataHolder
-    } = opts.nodeData;
+      ...data
+    } = opts.nodeData
 
-    console.log(`CLICKED on ${name}:${path}:${checked}:${isOpen}`);
-  };
+    window['electronAPI'].settings().then((val: Dictionary) => {
+      if (val.tree.customDataHolder) {
+        val.tree.customDataHolder.jsonSchema.schemaName =
+          data.customDataHolder?.jsonSchema.schemaName || ''
+        val.tree.customDataHolder.jsonSchema.fullFolderPath =
+          data.customDataHolder?.jsonSchema.fullFolderPath || ''
+        val.tree.customDataHolder.jsonSchema.referenceData =
+          data.customDataHolder?.jsonSchema.referenceData
+
+        console.log(`CLICKED on ${name}:${data.customDataHolder?.jsonSchema.schemaName}`)
+      }
+
+      settings = val
+      setTreeState(settings.tree as ExtendedNodeData)
+    })
+
+    opts.defaultOnClick()
+  }
 
   return (
     <>
       <div className="container">
-        <div className='leftSidebar'>
-          <div id="treeView" className='padding10px'>
+        <div className="leftSidebar">
+          <div id="treeView" className="padding10px">
             <FolderTree
               showCheckbox={false}
               indentPixels={8}
               data={treeState}
               onChange={onTreeStateChange}
               onNameClick={onNameClick}
+              iconComponents={customIcons}
             />
           </div>
         </div>
 
         <div></div>
 
-        <div className='padding10px'>
-          <div className='readableBackground'>
+        <div className="padding10px">
+          <div className="readableBackground">
             Project Path: <strong id="rootPath"></strong>
           </div>
-          <Form className='readableBackground' schema={schema} validator={validator} />
-
+          <Form
+            key={new Date().getTime()}
+            className="readableBackground"
+            schema={treeState.customDataHolder?.jsonSchema?.referenceData}
+            uiSchema={{}}
+            formData={{}}
+            validator={validator}
+            onChange={onFormChange}
+            onSubmit={onSubmit}
+            onError={customLog('errors')}
+          />
           <div className="horizontalOrderedRight padding10px">
             <div>
-              <button
-                onClick={onSaveClick}
-                type="button"
-                id="btnSave">Save
+              <button onClick={onSaveClick} type="button" id="btnSave">
+                Save
               </button>
             </div>
             <div>
-              <button
-                onClick={onRefreshClick}
-                type="button"
-                id="btnRefreshSettings">Load/Reset
+              <button onClick={onRefreshClick} type="button" id="btnRefreshSettings">
+                Load/Reset
               </button>
             </div>
           </div>

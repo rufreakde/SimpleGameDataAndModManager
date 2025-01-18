@@ -1,4 +1,5 @@
 import { NodeData } from 'react-folder-tree'
+import { RJSFSchema } from '@rjsf/utils'
 import * as os from 'os'
 
 import * as fs from 'fs'
@@ -7,19 +8,20 @@ import path from 'path'
 import filehandling from './filehandling'
 
 export type Dictionary = {
-  [key: string]: NodeData | StringDictKVs | null
+  paths: StringDictKVs
+  tree: ExtendedNodeData
 }
 
 export interface Schema {
   schemaName: string
   fullFolderPath: string
-  referenceData: any
+  referenceData: RJSFSchema
 }
 
 export interface customDataHolder {
   fullFolderPath?: string
   isFolder?: boolean
-  jsonSchema?: Schema
+  jsonSchema: Schema
   instanceData?: any
 }
 
@@ -31,11 +33,21 @@ export type StringDictKVs = {
   [key: string]: string
 }
 
-export const emptyFolderNodeData = (nameOfList: string): ExtendedNodeData => {
+export const emptyFolderNodeData = (
+  nameOfList: string,
+  jsonSchemaValue: RJSFSchema
+): ExtendedNodeData => {
   return {
     _id: 0,
     name: nameOfList,
-    children: []
+    children: [],
+    customDataHolder: {
+      jsonSchema: {
+        schemaName: '',
+        fullFolderPath: '',
+        referenceData: jsonSchemaValue
+      }
+    }
   }
 }
 
@@ -64,12 +76,14 @@ function AddChildAt(
   return createdItemsCounter + 1
 }
 
-export async function getTree(directoryPath: string): Promise<ExtendedNodeData> {
+export async function getTree(
+  passedRootRef: ExtendedNodeData,
+  directoryPath: string
+): Promise<ExtendedNodeData> {
   const isWindows = os.platform() === 'win32'
   const pathDelimiter = isWindows ? '\\' : '/'
   const schemasDict: StringDictKVs | any = {}
 
-  const tree: ExtendedNodeData = emptyFolderNodeData('root')
   // Get an array of all files and directories in the passed directory using fs.readdirSync
   const schemas = filehandling.getJsonSchemaFileHandles(directoryPath)
   //const directoryList = filehandling.getAllDirectories(directoryPath  + "/Content");
@@ -86,13 +100,13 @@ export async function getTree(directoryPath: string): Promise<ExtendedNodeData> 
 
   for (const file of Array.from(instances)) {
     let parentsInDepth: ExtendedNodeData[] = []
-    parentsInDepth.push(tree)
+    parentsInDepth.push(passedRootRef)
 
     const foldersBeginning = file.parentPath.split('Content')
 
     if (!foldersBeginning[1]) {
       alert('Error could not find Content folder!')
-      return tree
+      return passedRootRef
     }
 
     const folders = foldersBeginning[1].split(pathDelimiter)
@@ -131,7 +145,7 @@ export async function getTree(directoryPath: string): Promise<ExtendedNodeData> 
     )
   }
 
-  return tree
+  return passedRootRef
 }
 
 async function findSchemaByChildParentFolder(
@@ -182,7 +196,7 @@ function newChildFileNode(
   instanceData: any,
   schemaName: string,
   schemaPath: string,
-  schemaData: any
+  schemaData: RJSFSchema
 ): ExtendedNodeData {
   return {
     _id: _theID,
@@ -210,7 +224,12 @@ function newChildFolderNode(_theID: number, folderName: string, path: string): E
     isOpen: true,
     customDataHolder: {
       isFolder: true,
-      fullFolderPath: path
+      fullFolderPath: path,
+      jsonSchema: {
+        schemaName: '',
+        fullFolderPath: '',
+        referenceData: {}
+      }
     }
   }
 }

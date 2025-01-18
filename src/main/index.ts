@@ -7,22 +7,26 @@ import { getTree, emptyFolderNodeData, Dictionary } from './tree'
 
 // Settings object to send over
 async function getSettings() {
-
   let settings: Dictionary = {
-    'paths': {
-        'root': `${app.getAppPath()}`
+    paths: {
+      root: `${app.getAppPath()}`
     },
-    'tree':  emptyFolderNodeData("root"),
+    tree: emptyFolderNodeData('root', {
+      title: 'root',
+      description: 'Currently displayed form in UI main screen.',
+      type: 'object',
+      properties: {}
+    })
   }
 
-  if (!settings.paths ){
+  if (!settings.paths) {
     alert(`Error no relevant Data found in path location; ${app.getAppPath()}`)
     return settings
   }
 
-  settings.tree = await getTree( settings.paths.root )
+  settings.tree = await getTree(settings.tree, settings.paths.root)
 
-  return settings;
+  return settings
 }
 
 function createWindow(): void {
@@ -41,7 +45,7 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     // send data to renderer thread
-    ipcMain.handle('settings', getSettings);
+    ipcMain.handle('settings', getSettings)
     mainWindow.show()
   })
 

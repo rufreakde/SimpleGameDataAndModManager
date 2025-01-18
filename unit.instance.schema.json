@@ -1,24 +1,38 @@
 {
-    "title": "Files",
-    "type": "object",
-    "properties": {
-      "file": {
-        "type": "string",
-        "format": "data-url",
-        "title": "Single file"
-      },
-      "files": {
-        "type": "array",
-        "title": "Multiple files",
-        "items": {
-          "type": "string",
-          "format": "data-url"
-        }
-      },
-      "filesAccept": {
-        "type": "string",
-        "format": "data-url",
-        "title": "Single File with Accept attribute"
-      }
+  "title": "A registration form",
+  "description": "A simple form example.",
+  "type": "object",
+  "required": [
+    "firstName",
+    "lastName"
+  ],
+  "properties": {
+    "firstName": {
+      "type": "string",
+      "title": "First name",
+      "default": "Chuck"
+    },
+    "lastName": {
+      "type": "string",
+      "title": "Last name"
+    },
+    "age": {
+      "type": "integer",
+      "title": "Age"
+    },
+    "bio": {
+      "type": "string",
+      "title": "Bio"
+    },
+    "password": {
+      "type": "string",
+      "title": "Password",
+      "minLength": 3
+    },
+    "telephone": {
+      "type": "string",
+      "title": "Telephone",
+      "minLength": 10
     }
   }
+}
