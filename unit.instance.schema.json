@@ -1,38 +1,110 @@
 {
-  "title": "A registration form",
-  "description": "A simple form example.",
+  "title": "Unit",
   "type": "object",
-  "required": [
-    "firstName",
-    "lastName"
-  ],
+  "additionalProperties": false,
   "properties": {
-    "firstName": {
-      "type": "string",
-      "title": "First name",
-      "default": "Chuck"
+    "Type": {
+      "type": "string"
     },
-    "lastName": {
-      "type": "string",
-      "title": "Last name"
+    "Path": {
+      "type": "string"
     },
-    "age": {
+    "Name": {
+      "type": "string"
+    },
+    "Hash": {
+      "type": "string"
+    },
+    "ProductionClass": {
+      "type": "string"
+    },
+    "Invincibility": {
+      "type": "boolean"
+    },
+    "LuckModifier": {
       "type": "integer",
-      "title": "Age"
+      "format": "int32"
     },
-    "bio": {
-      "type": "string",
-      "title": "Bio"
+    "Weapons": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/Weapon"
+      }
     },
-    "password": {
-      "type": "string",
-      "title": "Password",
-      "minLength": 3
+    "Armor": {
+      "$ref": "#/definitions/Armor"
     },
-    "telephone": {
-      "type": "string",
-      "title": "Telephone",
-      "minLength": 10
+    "Movement": {
+      "$ref": "#/definitions/Movement"
+    }
+  },
+  "definitions": {
+    "Weapon": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Primary": {
+          "type": "boolean"
+        },
+        "PossibleTargets": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "Armor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Key": {
+          "type": "string"
+        }
+      }
+    },
+    "Movement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Can": {
+          "$ref": "#/definitions/MovementCapabilities"
+        },
+        "BaseSpeed": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Modifiers": {
+          "$ref": "#/definitions/MovementModifiers"
+        }
+      }
+    },
+    "MovementCapabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "WalkDrive": {
+          "type": "boolean"
+        },
+        "Swim": {
+          "type": "boolean"
+        },
+        "Fly": {
+          "type": "boolean"
+        }
+      }
+    },
+    "MovementModifiers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Weight": {
+          "type": "string"
+        },
+        "Tires": {
+          "type": "string"
+        }
+      }
     }
   }
 }

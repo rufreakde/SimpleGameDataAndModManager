@@ -1,6 +1,7 @@
 import Versions from './components/Versions'
 
-import Form, { IChangeEvent } from '@rjsf/core'
+import { withTheme } from '@rjsf/core'
+import { Theme as SemanticUITheme } from '@rjsf/semantic-ui'
 import validator from '@rjsf/validator-ajv8'
 
 import FolderTree from 'react-folder-tree'
@@ -10,6 +11,7 @@ import { useState } from 'react'
 import { IconComponents } from 'react-folder-tree'
 
 const textRootPath = 'rootPath'
+const Form = withTheme(SemanticUITheme)
 
 let settings: Dictionary
 
@@ -38,7 +40,6 @@ function App(): JSX.Element {
     return <HiOutlineXMark onClick={handleClick} />
   }
 
-  let isFormVisible = true
   const [treeState, setTreeState] = useState<ExtendedNodeData>({
     name: 'root',
     children: [],
@@ -67,21 +68,26 @@ function App(): JSX.Element {
       }
 
       setTreeState(settings.tree as ExtendedNodeData)
+      alert('Loaded from filesystem')
     })
   }
 
   const onSaveClick = () => {
-    alert('Saved To Filesystem')
+    alert('Saved to filesystem')
   }
 
   const customLog = (type) => console.log.bind(console, type)
 
   const onFormChange = (a: any, b: any) => {
-    return console.log('Form Data changed: ', a)
+    // TODO
+    // this here will be the meat and bones of saving to the data section
+    // afterwards it will move over
+    // also we need to save delta values which means if someone does not edit something correclty it will persist the error as well
+    return console.log('Form data changed: ', a, b)
   }
 
   const onSubmit = (a: any, b: any) => {
-    return console.log('Form Data submitted: ', a)
+    return console.log('Form data submitted: ', a, b)
   }
 
   const onNameClick = (opts: { defaultOnClick: () => void; nodeData: ExtendedNodeData }) => {
@@ -139,7 +145,8 @@ function App(): JSX.Element {
           </div>
           <Form
             key={new Date().getTime()}
-            className="readableBackground"
+            //className="readableBackground"
+            children={true} // hide submit button
             schema={treeState.customDataHolder?.jsonSchema?.referenceData}
             uiSchema={{}}
             formData={{}}
@@ -149,14 +156,19 @@ function App(): JSX.Element {
             onError={customLog('errors')}
           />
           <div className="horizontalOrderedRight padding10px">
-            <div>
-              <button onClick={onSaveClick} type="button" id="btnSave">
-                Save
+            <div className="padding10px">
+              <button onClick={onSaveClick} type="button" id="btnSave" className="buttonPurple">
+                Save to Disk
               </button>
             </div>
-            <div>
-              <button onClick={onRefreshClick} type="button" id="btnRefreshSettings">
-                Load/Reset
+            <div className="padding10px">
+              <button
+                onClick={onRefreshClick}
+                type="button"
+                id="btnRefreshSettings"
+                className="buttonPurple"
+              >
+                Load from Disk
               </button>
             </div>
           </div>

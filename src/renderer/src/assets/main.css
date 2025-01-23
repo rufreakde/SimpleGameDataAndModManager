@@ -1,4 +1,5 @@
-@import './base.css';
+/* @import './base.css'; */
+@import 'semantic-ui-css/semantic.min.css';
 
 body {
   display: flex;
@@ -192,17 +193,23 @@ code {
 }
 
 .leftSidebar {
-  background-color: #0050A0;
   overflow-x: scroll;
-  border-right: 4mm ridge beige;
+  backdrop-filter: blur(20px);
+  background-color: var(--custom-bg-color);
+  border-radius: 6px;
+  border-style:solid;
+  border-color: beige;
+  border-width: 2px;
 }
 
 .readableBackground {
   padding: 15px;
-  background-color: #0050A0;
-  border-radius: 8px;
-  border: aliceblue;
-  border: 1mm ridge beige;
+  backdrop-filter: blur(20px);
+  background-color: var(--custom-bg-color);
+  border-radius: 6px;
+  border-style:solid;
+  border-color: beige;
+  border-width: 2px;
 }
 
 .blurry {
@@ -215,5 +222,50 @@ code {
 }
 
 .padding10px {
-  padding: 10px 10px 10px 10px;
+  padding: 5px 5px 10px 10px;
+}
+
+.buttonDefault {
+  background-color: rgb(51, 51, 51);
+  color: var(--ev-c-text-1);
+  border-radius: 8px;
+  border-width: 0;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 10px 12px;
+  text-align: center;
+  transition: all 200ms;
+  vertical-align: baseline;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.buttonPurple {
+  background: #444446f8;
+  border-radius: 999px;
+  box-shadow: #404061 0 10px 20px -10px;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-family: Inter,Helvetica,"Apple Color Emoji","Segoe UI Emoji",NotoColorEmoji,"Noto Color Emoji","Segoe UI Symbol","Android Emoji",EmojiSymbols,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  opacity: 1;
+  outline: 0 solid transparent;
+  padding: 9px 24px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  width: fit-content;
+  word-break: break-word;
+  border: 0;
 }

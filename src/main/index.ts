@@ -12,8 +12,8 @@ async function getSettings() {
       root: `${app.getAppPath()}`
     },
     tree: emptyFolderNodeData('root', {
-      title: 'root',
-      description: 'Currently displayed form in UI main screen.',
+      title: 'Game Data Editor',
+      description: 'Choose a file on the left to edit. Submit to save.',
       type: 'object',
       properties: {}
     })
