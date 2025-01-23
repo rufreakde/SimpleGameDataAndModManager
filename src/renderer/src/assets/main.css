@@ -1,5 +1,4 @@
-/* @import './base.css'; */
-@import 'semantic-ui-css/semantic.min.css';
+@import './base.css';
 
 body {
   display: flex;

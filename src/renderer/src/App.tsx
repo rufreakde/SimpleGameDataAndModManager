@@ -1,7 +1,7 @@
 import Versions from './components/Versions'
 
 import { withTheme } from '@rjsf/core'
-import { Theme as SemanticUITheme } from '@rjsf/semantic-ui'
+import { Theme as AntDTheme } from '@rjsf/antd'
 import validator from '@rjsf/validator-ajv8'
 
 import FolderTree from 'react-folder-tree'
@@ -11,7 +11,7 @@ import { useState } from 'react'
 import { IconComponents } from 'react-folder-tree'
 
 const textRootPath = 'rootPath'
-const Form = withTheme(SemanticUITheme)
+const Form = withTheme(AntDTheme)
 
 let settings: Dictionary
 
