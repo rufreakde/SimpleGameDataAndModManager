@@ -1,7 +1,9 @@
 import Versions from './components/Versions'
 
+import { ThemeProvider, createTheme } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
 import { withTheme } from '@rjsf/core'
-import { Theme as AntDTheme } from '@rjsf/antd'
+import { Theme } from '@rjsf/mui'
 import validator from '@rjsf/validator-ajv8'
 
 import FolderTree from 'react-folder-tree'
@@ -11,7 +13,98 @@ import { useState } from 'react'
 import { IconComponents } from 'react-folder-tree'
 
 const textRootPath = 'rootPath'
-const Form = withTheme(AntDTheme)
+const Form = withTheme(Theme)
+
+// https://github.com/rjsf-team/react-jsonschema-form/issues/4466
+const darkTheme = createTheme({
+  spacing: -5,
+  palette: {
+    mode: 'dark'
+  },
+  typography: {
+    // In Chinese and Japanese the characters are usually larger,
+    // so a smaller fontsize may be appropriate.
+    fontSize: 12
+  },
+  components: {
+    MuiGrid: {
+      defaultProps: {
+        xs: 6,
+        spacing: 2,
+        marginBottom: 0,
+        marginTop: 3.5
+      }
+    },
+    MuiGrid2: {
+      defaultProps: {}
+    },
+    MuiButton: {
+      defaultProps: {
+        size: 'small'
+      }
+    },
+    MuiFilledInput: {
+      defaultProps: {
+        margin: 'dense'
+      }
+    },
+    MuiFormControl: {
+      defaultProps: {
+        margin: 'dense'
+      }
+    },
+    MuiFormHelperText: {
+      defaultProps: {
+        margin: 'dense'
+      }
+    },
+    MuiIconButton: {
+      defaultProps: {
+        size: 'small'
+      }
+    },
+    MuiInputBase: {
+      defaultProps: {
+        margin: 'dense'
+      }
+    },
+    MuiInputLabel: {
+      defaultProps: {
+        margin: 'dense'
+      }
+    },
+    MuiListItem: {
+      defaultProps: {
+        dense: true
+      }
+    },
+    MuiOutlinedInput: {
+      defaultProps: {
+        margin: 'dense'
+      }
+    },
+    MuiFab: {
+      defaultProps: {
+        size: 'small'
+      }
+    },
+    MuiTable: {
+      defaultProps: {
+        size: 'small'
+      }
+    },
+    MuiTextField: {
+      defaultProps: {
+        margin: 'dense'
+      }
+    },
+    MuiToolbar: {
+      defaultProps: {
+        variant: 'dense'
+      }
+    }
+  }
+})
 
 let settings: Dictionary
 
@@ -143,21 +236,26 @@ function App(): JSX.Element {
           <div className="readableBackground">
             Project Path: <strong id="rootPath"></strong>
           </div>
-          <Form
-            key={new Date().getTime()}
-            //className="readableBackground"
-            children={true} // hide submit button
-            schema={treeState.customDataHolder?.jsonSchema?.referenceData}
-            uiSchema={{}}
-            formData={{}}
-            validator={validator}
-            onChange={onFormChange}
-            onSubmit={onSubmit}
-            onError={customLog('errors')}
-          />
+          <div>
+            <ThemeProvider theme={darkTheme}>
+              <CssBaseline />
+              <Form
+                key={new Date().getTime()}
+                className="readableBackground"
+                children={true} // hide submit button
+                schema={treeState.customDataHolder?.jsonSchema?.referenceData}
+                uiSchema={{}}
+                formData={{}}
+                validator={validator}
+                onChange={onFormChange}
+                onSubmit={onSubmit}
+                onError={customLog('errors')}
+              />
+            </ThemeProvider>
+          </div>
           <div className="horizontalOrderedRight padding10px">
             <div className="padding10px">
-              <button onClick={onSaveClick} type="button" id="btnSave" className="buttonPurple">
+              <button onClick={onSaveClick} type="button" id="btnSave" className="buttonDefault">
                 Save to Disk
               </button>
             </div>
@@ -166,7 +264,7 @@ function App(): JSX.Element {
                 onClick={onRefreshClick}
                 type="button"
                 id="btnRefreshSettings"
-                className="buttonPurple"
+                className="buttonDefault"
               >
                 Load from Disk
               </button>
