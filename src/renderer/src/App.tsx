@@ -29,8 +29,11 @@ const darkTheme = createTheme({
   components: {
     MuiGrid: {
       defaultProps: {
-        xs: 6,
-        spacing: 2,
+        columns: 12,
+        rowSpacing: 0,
+        direction: 'row',
+        wrap: 'wrap',
+        spacing: 0,
         marginBottom: 0,
         marginTop: 3.5
       }
@@ -216,7 +219,7 @@ function App(): JSX.Element {
 
   return (
     <>
-      <div className="container">
+      <div className="backgroundImage">
         <div className="leftSidebar">
           <div id="treeView" className="padding10px">
             <FolderTree
@@ -230,49 +233,50 @@ function App(): JSX.Element {
           </div>
         </div>
 
-        <div></div>
-
-        <div className="padding10px">
-          <div className="readableBackground">
-            Project Path: <strong id="rootPath"></strong>
-          </div>
-          <div>
-            <ThemeProvider theme={darkTheme}>
-              <CssBaseline />
-              <Form
-                key={new Date().getTime()}
-                className="readableBackground"
-                children={true} // hide submit button
-                schema={treeState.customDataHolder?.jsonSchema?.referenceData}
-                uiSchema={{}}
-                formData={{}}
-                validator={validator}
-                onChange={onFormChange}
-                onSubmit={onSubmit}
-                onError={customLog('errors')}
-              />
-            </ThemeProvider>
-          </div>
-          <div className="horizontalOrderedRight padding10px">
-            <div className="padding10px">
-              <button onClick={onSaveClick} type="button" id="btnSave" className="buttonDefault">
-                Save to Disk
-              </button>
-            </div>
-            <div className="padding10px">
-              <button
-                onClick={onRefreshClick}
-                type="button"
-                id="btnRefreshSettings"
-                className="buttonDefault"
-              >
-                Load from Disk
-              </button>
-            </div>
-          </div>
+        <div className="pathView padding10px">
+          Project Path: <strong id="rootPath"></strong>
         </div>
 
-        <div></div>
+        <div className="consoleView">
+          Console
+          <br />
+          <strong id="consoleLog"></strong>
+        </div>
+
+        <div className="middleMainFormsView">
+          <ThemeProvider theme={darkTheme}>
+            <CssBaseline />
+            <Form
+              key={new Date().getTime()}
+              children={true} // hide submit button
+              schema={treeState.customDataHolder?.jsonSchema?.referenceData}
+              uiSchema={{}}
+              formData={{}}
+              validator={validator}
+              onChange={onFormChange}
+              onSubmit={onSubmit}
+              onError={customLog('errors')}
+            />
+          </ThemeProvider>
+        </div>
+
+        <div className="mainButtons horizontalOrderedRight">
+          <div className="padding10px">
+            <button onClick={onSaveClick} type="button" id="btnSave" className="buttonDefault">
+              Save to Disk
+            </button>
+          </div>
+          <div className="padding10px">
+            <button
+              onClick={onRefreshClick}
+              type="button"
+              id="btnRefreshSettings"
+              className="buttonDefault"
+            >
+              Load from Disk
+            </button>
+          </div>
+        </div>
       </div>
 
       <Versions></Versions>

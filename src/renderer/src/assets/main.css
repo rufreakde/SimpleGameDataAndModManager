@@ -1,11 +1,5 @@
 @import './base.css';
 
-/* 
-https://github.com/rjsf-team/react-jsonschema-form/tree/main/packages/antd
-https://ant.design/components/overview/ 
-*/
-
-
 body {
   display: flex;
   align-items: center;
@@ -39,7 +33,7 @@ code {
   margin-bottom: 80px;
 }
 
-/* .logo {
+.logo {
   margin-bottom: 20px;
   -webkit-user-drag: none;
   height: 128px;
@@ -50,15 +44,15 @@ code {
 
 .logo:hover {
   filter: drop-shadow(0 0 1.2em #6988e6aa);
-} */
+}
 
-/* .creator {
+.creator {
   font-size: 14px;
   line-height: 16px;
   color: var(--ev-c-text-2);
   font-weight: 600;
   margin-bottom: 10px;
-} */
+} 
 
 .text {
   font-size: 28px;
@@ -130,55 +124,6 @@ code {
   background-color: var(--ev-button-alt-hover-bg);
 }
 
-/* .versions {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 30px;
-  margin: 0 auto;
-  padding: 15px 0;
-  font-family: 'Menlo', 'Lucida Console', monospace;
-  display: inline-flex;
-  overflow: hidden;
-  align-items: center;
-  border-radius: 22px;
-  background-color: #202127;
-  backdrop-filter: blur(24px);
-}
-
-.versions li {
-  display: block;
-  float: left;
-  border-right: 1px solid var(--ev-c-gray-1);
-  padding: 0 20px;
-  font-size: 14px;
-  line-height: 14px;
-  opacity: 0.8;
-
-  &:last-child {
-    border: none;
-  }
-} */
-
-@media (max-width: 720px) {
-  .text {
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 620px) {
-  .versions {
-    display: none;
-  }
-}
-
-@media (max-width: 350px) {
-
-  .tip,
-  .actions {
-    display: none;
-  }
-}
 
 .horizontalOrderedRight {
   display: grid;
@@ -188,16 +133,17 @@ code {
   margin-right: 10px;
 }
 
-.container {
-  background-size: 100% 100%;
-  white-space: nowrap;
-  height: 100vh;
-  display: grid;
-  grid-template-columns: 340px 30px auto 30px;
-
+.backgroundImage{
+  background-image: url('./fhd.jpg');
+  background-size: cover;
 }
 
-.leftSidebar {
+.leftSidebar{
+  position:fixed;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 100vh;
   overflow-x: scroll;
   backdrop-filter: blur(20px);
   background-color: var(--custom-bg-color);
@@ -207,8 +153,13 @@ code {
   border-width: 2px;
 }
 
-.readableBackground {
-  padding: 9px;
+.middleMainFormsView{
+  position:fixed;
+  top: 40px;
+  left: 340px;
+  width: calc(100vw - 380px);
+  height: calc(100vh - 160px);;
+  overflow: auto;
   backdrop-filter: blur(20px);
   background-color: var(--custom-bg-color);
   border-radius: 6px;
@@ -217,13 +168,43 @@ code {
   border-width: 2px;
 }
 
-.blurry {
-  color: #202127;
-  backdrop-filter: blur(10px);
+.mainButtons{
+  position:fixed;
+  bottom: 0px;
+  left: 120px;
+  width: 600px;
+  height: 100px;
 }
 
-.marginTop10px {
-  margin-top: 10px;
+.pathView {
+  position:fixed;
+  top: 4px;
+  right: 40px;
+  width: 680px;
+  height: 34px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  backdrop-filter: blur(20px);
+  background-color: var(--custom-bg-color);
+  border-radius: 6px;
+  border-style:solid;
+  border-color: beige;
+  border-width: 2px;
+}
+
+.consoleView {
+  position:fixed;
+  bottom: 14px;
+  right: 40px;
+  width: 680px;
+  height: 96px;
+  overflow-y: scroll;
+  backdrop-filter: blur(20px);
+  background-color: var(--custom-bg-color);
+  border-radius: 6px;
+  border-style:solid;
+  border-color: beige;
+  border-width: 2px;
 }
 
 .padding10px {

@@ -3,6 +3,7 @@
 A simple way to manage your Data within your game application making creating new instancee simple. You can maintain and edit game and mod files with this editor it is build for `modding in mind` projects.
 
 Work in progress
+
 - ✅ - Electron Windows Build
 - ✅ - Basic UI
 - 🔄 - UI to display the Filetree
@@ -15,7 +16,6 @@ Work in progress
 - ❌ - Electron Mac Build
 - ❌ - Electron Linux Build
 
-
 ## Recommended IDE Setup
 
 - [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
@@ -25,12 +25,13 @@ Work in progress
 ### Install
 
 ```bash
-$ npm install
+$ npm install --legacy-peer-deps
 ```
 
 ### Development
 
 Debug logs:
+
 ```bash
 set ELECTRON_ENABLE_LOGGING=true # windows
 ```
