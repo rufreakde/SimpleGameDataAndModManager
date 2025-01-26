@@ -12,99 +12,151 @@
     "Name": {
       "type": "string"
     },
-    "Hash": {
-      "type": "string"
-    },
     "ProductionClass": {
-      "type": "string"
-    },
-    "Invincibility": {
-      "type": "boolean"
+      "$ref": "#/definitions/ProductionClass"
     },
     "LuckModifier": {
       "type": "integer",
       "format": "int32"
     },
-    "Weapons": {
-      "type": "object",
-      "additionalProperties": {
-        "$ref": "#/definitions/Weapon"
-      }
+    "Movement": {
+      "$ref": "#/definitions/Movement"
     },
     "Armor": {
       "$ref": "#/definitions/Armor"
     },
-    "Movement": {
-      "$ref": "#/definitions/Movement"
+    "ArmorModifier": {
+      "type": "integer",
+      "format": "int32"
+    },
+    "PrimaryWeapon": {
+      "$ref": "#/definitions/Weapon"
+    },
+    "SecondaryWeapon": {
+      "$ref": "#/definitions/Weapon"
     }
   },
   "definitions": {
+    "ProductionClass": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "Ground",
+        "Air",
+        "Water"
+      ],
+      "enum": [
+        "Ground",
+        "Air",
+        "Water"
+      ]
+    },
+    "Movement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "BaseMovement": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "CanWalkDrive": {
+          "type": "boolean"
+        },
+        "CanSwim": {
+          "type": "boolean"
+        },
+        "CanFly": {
+          "type": "boolean"
+        },
+        "Weight": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Tires": {
+          "$ref": "#/definitions/TiresOrLegs"
+        }
+      }
+    },
+    "TiresOrLegs": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "RubberTires",
+        "Chains",
+        "HumanLegs",
+        "RoboticLegs",
+        "Hover",
+        "Fly"
+      ],
+      "enum": [
+        "RubberTires",
+        "Chains",
+        "HumanLegs",
+        "RoboticLegs",
+        "Hover",
+        "Fly"
+      ]
+    },
+    "Armor": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "LightInfantry",
+        "HeavyInfantry",
+        "LightVehicle",
+        "MediumVehicle",
+        "HeavyVehicle",
+        "SuperHeavyVehicle"
+      ],
+      "enum": [
+        "LightInfantry",
+        "HeavyInfantry",
+        "LightVehicle",
+        "MediumVehicle",
+        "HeavyVehicle",
+        "SuperHeavyVehicle"
+      ]
+    },
     "Weapon": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "Primary": {
-          "type": "boolean"
+        "Calibre": {
+          "$ref": "#/definitions/Calibre"
         },
-        "PossibleTargets": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "boolean"
-          }
-        }
-      }
-    },
-    "Armor": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "Key": {
-          "type": "string"
-        }
-      }
-    },
-    "Movement": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "Can": {
-          "$ref": "#/definitions/MovementCapabilities"
-        },
-        "BaseSpeed": {
+        "BaseDamage": {
           "type": "integer",
           "format": "int32"
         },
-        "Modifiers": {
-          "$ref": "#/definitions/MovementModifiers"
-        }
-      }
-    },
-    "MovementCapabilities": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "WalkDrive": {
+        "canHitGround": {
           "type": "boolean"
         },
-        "Swim": {
+        "canHitGroundSpecial": {
           "type": "boolean"
         },
-        "Fly": {
+        "canHitAir": {
+          "type": "boolean"
+        },
+        "canHitAirSpecial": {
           "type": "boolean"
         }
       }
     },
-    "MovementModifiers": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "Weight": {
-          "type": "string"
-        },
-        "Tires": {
-          "type": "string"
-        }
-      }
+    "Calibre": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "Light",
+        "Medium",
+        "Heavy",
+        "SuperHeavy"
+      ],
+      "enum": [
+        "Light",
+        "Medium",
+        "Heavy",
+        "SuperHeavy"
+      ]
     }
   }
 }

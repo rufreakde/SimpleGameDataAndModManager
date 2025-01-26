@@ -12,7 +12,8 @@ import { HiDocument, HiOutlineXMark } from 'react-icons/hi2'
 import { useState } from 'react'
 import { IconComponents } from 'react-folder-tree'
 
-const textRootPath = 'rootPath'
+const textRootPathId = 'rootPath'
+const consoleTextId = 'consoleLog'
 const Form = withTheme(Theme)
 
 // https://github.com/rjsf-team/react-jsonschema-form/issues/4466
@@ -34,8 +35,7 @@ const darkTheme = createTheme({
         direction: 'row',
         wrap: 'wrap',
         spacing: 0,
-        marginBottom: 0,
-        marginTop: 3.5
+        xs: 11
       }
     },
     MuiGrid2: {
@@ -111,6 +111,14 @@ const darkTheme = createTheme({
 
 let settings: Dictionary
 
+function writeIntoConsole(text: string) {
+  const consoleElement = document.getElementById(consoleTextId)
+  if (consoleElement != null) {
+    console.log(`Console: ${text}`)
+    consoleElement.innerText = text
+  }
+}
+
 function App(): JSX.Element {
   const customIcons: IconComponents = {
     FileIcon: customFileIcon,
@@ -157,7 +165,7 @@ function App(): JSX.Element {
 
   const onRefreshClick = () => {
     window['electronAPI'].settings().then((val: Dictionary) => {
-      const filePathElement = document.getElementById(textRootPath)
+      const filePathElement = document.getElementById(textRootPathId)
       if (filePathElement != null) {
         filePathElement.innerText = val.paths.root
         settings = val
@@ -165,11 +173,14 @@ function App(): JSX.Element {
 
       setTreeState(settings.tree as ExtendedNodeData)
       alert('Loaded from filesystem')
+
+      writeIntoConsole('Loaded from filesystem')
     })
   }
 
   const onSaveClick = () => {
     alert('Saved to filesystem')
+    writeIntoConsole('Loaded from filesystem')
   }
 
   const customLog = (type) => console.log.bind(console, type)
