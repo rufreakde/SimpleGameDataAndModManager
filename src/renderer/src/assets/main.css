@@ -166,6 +166,8 @@ code {
   border-style:solid;
   border-color: beige;
   border-width: 2px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .mainButtons{

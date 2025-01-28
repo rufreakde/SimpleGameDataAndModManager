@@ -4,6 +4,8 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { withTheme } from '@rjsf/core'
 import { Theme } from '@rjsf/mui'
+import ObjectFieldTemplate from './ObjectFieldTemplate'
+// check: for custom logic https://github.com/rjsf-team/react-jsonschema-form/pull/2597/files
 import validator from '@rjsf/validator-ajv8'
 
 import FolderTree from 'react-folder-tree'
@@ -18,7 +20,6 @@ const Form = withTheme(Theme)
 
 // https://github.com/rjsf-team/react-jsonschema-form/issues/4466
 const darkTheme = createTheme({
-  spacing: -5,
   palette: {
     mode: 'dark'
   },
@@ -28,17 +29,15 @@ const darkTheme = createTheme({
     fontSize: 12
   },
   components: {
-    MuiGrid: {
+    MuiGrid2: {
       defaultProps: {
-        columns: 12,
-        rowSpacing: 0,
-        direction: 'row',
-        wrap: 'wrap',
-        spacing: 0,
-        xs: 11
+        size: {
+          xs: 3,
+          xl: 3
+        }
       }
     },
-    MuiGrid2: {
+    MuiGrid: {
       defaultProps: {}
     },
     MuiButton: {
@@ -261,12 +260,15 @@ function App(): JSX.Element {
               key={new Date().getTime()}
               children={true} // hide submit button
               schema={treeState.customDataHolder?.jsonSchema?.referenceData}
-              uiSchema={{}}
-              formData={{}}
+              // uiSchema={{}}
+              // formData={{}}
               validator={validator}
               onChange={onFormChange}
               onSubmit={onSubmit}
               onError={customLog('errors')}
+              templates={{
+                ObjectFieldTemplate: ObjectFieldTemplate
+              }}
             />
           </ThemeProvider>
         </div>

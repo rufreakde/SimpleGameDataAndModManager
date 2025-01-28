@@ -1,4 +1,5 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Unit",
   "type": "object",
   "additionalProperties": false,
@@ -19,9 +20,6 @@
       "type": "integer",
       "format": "int32"
     },
-    "Movement": {
-      "$ref": "#/definitions/Movement"
-    },
     "Armor": {
       "$ref": "#/definitions/Armor"
     },
@@ -29,11 +27,20 @@
       "type": "integer",
       "format": "int32"
     },
+    "test1": {
+      "type": "string"
+    },
     "PrimaryWeapon": {
       "$ref": "#/definitions/Weapon"
     },
     "SecondaryWeapon": {
       "$ref": "#/definitions/Weapon"
+    },
+    "Movement": {
+      "$ref": "#/definitions/Movement"
+    },
+    "test": {
+      "type": "string"
     }
   },
   "definitions": {
@@ -121,9 +128,6 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "Calibre": {
-          "$ref": "#/definitions/Calibre"
-        },
         "BaseDamage": {
           "type": "integer",
           "format": "int32"
@@ -134,11 +138,17 @@
         "canHitGroundSpecial": {
           "type": "boolean"
         },
+        "Calibre": {
+          "$ref": "#/definitions/Calibre"
+        },
         "canHitAir": {
           "type": "boolean"
         },
         "canHitAirSpecial": {
           "type": "boolean"
+        },
+        "Test": {
+          "$ref": "#/definitions/Movement"
         }
       }
     },
