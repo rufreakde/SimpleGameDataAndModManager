@@ -1,6 +1,13 @@
 import Versions from './components/Versions'
 
 import { ThemeProvider, createTheme } from '@mui/material/styles'
+
+import Tab from '@mui/material/Tab'
+import TabContext from '@mui/lab/TabContext'
+import TabList from '@mui/lab/TabList'
+import TabPanel from '@mui/lab/TabPanel'
+import Box from '@mui/material/Box'
+
 import CssBaseline from '@mui/material/CssBaseline'
 import { withTheme } from '@rjsf/core'
 import { Theme } from '@rjsf/mui'
@@ -13,6 +20,8 @@ import { Dictionary, ExtendedNodeData } from '../../main/tree'
 import { HiDocument, HiOutlineXMark } from 'react-icons/hi2'
 import { useState } from 'react'
 import { IconComponents } from 'react-folder-tree'
+
+import * as React from 'react'
 
 const textRootPathId = 'rootPath'
 const consoleTextId = 'consoleLog'
@@ -35,74 +44,6 @@ const darkTheme = createTheme({
           xs: 3,
           xl: 3
         }
-      }
-    },
-    MuiGrid: {
-      defaultProps: {}
-    },
-    MuiButton: {
-      defaultProps: {
-        size: 'small'
-      }
-    },
-    MuiFilledInput: {
-      defaultProps: {
-        margin: 'dense'
-      }
-    },
-    MuiFormControl: {
-      defaultProps: {
-        margin: 'dense'
-      }
-    },
-    MuiFormHelperText: {
-      defaultProps: {
-        margin: 'dense'
-      }
-    },
-    MuiIconButton: {
-      defaultProps: {
-        size: 'small'
-      }
-    },
-    MuiInputBase: {
-      defaultProps: {
-        margin: 'dense'
-      }
-    },
-    MuiInputLabel: {
-      defaultProps: {
-        margin: 'dense'
-      }
-    },
-    MuiListItem: {
-      defaultProps: {
-        dense: true
-      }
-    },
-    MuiOutlinedInput: {
-      defaultProps: {
-        margin: 'dense'
-      }
-    },
-    MuiFab: {
-      defaultProps: {
-        size: 'small'
-      }
-    },
-    MuiTable: {
-      defaultProps: {
-        size: 'small'
-      }
-    },
-    MuiTextField: {
-      defaultProps: {
-        margin: 'dense'
-      }
-    },
-    MuiToolbar: {
-      defaultProps: {
-        variant: 'dense'
       }
     }
   }
@@ -212,12 +153,17 @@ function App(): JSX.Element {
       if (val.tree.customDataHolder) {
         val.tree.customDataHolder.jsonSchema.schemaName =
           data.customDataHolder?.jsonSchema.schemaName || ''
+
         val.tree.customDataHolder.jsonSchema.fullFolderPath =
           data.customDataHolder?.jsonSchema.fullFolderPath || ''
+
         val.tree.customDataHolder.jsonSchema.referenceData =
-          data.customDataHolder?.jsonSchema.referenceData
+          data.customDataHolder?.jsonSchema.referenceData || {}
+
+        val.tree.customDataHolder.instanceData = data.customDataHolder?.instanceData || {}
 
         console.log(`CLICKED on ${name}:${data.customDataHolder?.jsonSchema.schemaName}`)
+        console.log(`CLICKED on ${name}:${data.customDataHolder?.instanceData}`)
       }
 
       settings = val
@@ -225,6 +171,12 @@ function App(): JSX.Element {
     })
 
     opts.defaultOnClick()
+  }
+
+  const [value, setValue] = React.useState('1')
+
+  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+    setValue(newValue)
   }
 
   return (
@@ -254,23 +206,36 @@ function App(): JSX.Element {
         </div>
 
         <div className="middleMainFormsView">
-          <ThemeProvider theme={darkTheme}>
-            <CssBaseline />
-            <Form
-              key={new Date().getTime()}
-              children={true} // hide submit button
-              schema={treeState.customDataHolder?.jsonSchema?.referenceData}
-              // uiSchema={{}}
-              // formData={{}}
-              validator={validator}
-              onChange={onFormChange}
-              onSubmit={onSubmit}
-              onError={customLog('errors')}
-              templates={{
-                ObjectFieldTemplate: ObjectFieldTemplate
-              }}
-            />
-          </ThemeProvider>
+          <TabContext value={value}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <TabList onChange={handleChange} aria-label="lab API tabs example">
+                <Tab label="Edit" value="1" />
+                <Tab label="Data" value="2" />
+                <Tab label="Visuals" value="3" />
+              </TabList>
+            </Box>
+            <TabPanel value="1">
+              <ThemeProvider theme={darkTheme}>
+                <CssBaseline />
+                <Form
+                  key={new Date().getTime()}
+                  children={true} // hide submit button
+                  schema={treeState.customDataHolder?.jsonSchema?.referenceData}
+                  // uiSchema={{}}
+                  formData={treeState.customDataHolder?.instanceData}
+                  validator={validator}
+                  onChange={onFormChange}
+                  onSubmit={onSubmit}
+                  onError={customLog('errors')}
+                  templates={{
+                    ObjectFieldTemplate: ObjectFieldTemplate
+                  }}
+                />
+              </ThemeProvider>
+            </TabPanel>
+            <TabPanel value="2">TODO</TabPanel>
+            <TabPanel value="3">TODO</TabPanel>
+          </TabContext>
         </div>
 
         <div className="mainButtons horizontalOrderedRight">
