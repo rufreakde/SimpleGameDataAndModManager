@@ -5,7 +5,9 @@ import { electronAPI } from '@electron-toolkit/preload'
 const api = {}
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  settings: () => ipcRenderer.invoke('settings')
+  settingsChangeRootDir: () => ipcRenderer.invoke('change:rootDir'),
+  treeLoadEventListener: () => ipcRenderer.invoke('load:tree'),
+  treeClickedEventListener: () => ipcRenderer.invoke('click:tree')
 })
 
 // Use `contextBridge` APIs to expose Electron APIs to

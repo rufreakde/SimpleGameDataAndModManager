@@ -7,11 +7,6 @@ import path from 'path'
 
 import filehandling from './filehandling'
 
-export type Dictionary = {
-  paths: StringDictKVs
-  tree: ExtendedNodeData
-}
-
 export interface Schema {
   schemaName: string
   fullFolderPath: string
@@ -29,8 +24,20 @@ export interface ExtendedNodeData extends NodeData {
   customDataHolder?: customDataHolder
 }
 
-export type StringDictKVs = {
-  [key: string]: string
+export function initTree(): ExtendedNodeData {
+  return emptyFolderNodeData('root', {
+    title: 'Game Data Editor',
+    description: 'Choose a file on the left to edit. Submit to save.',
+    type: 'object',
+    properties: {}
+  })
+}
+
+export async function loadTree(
+  currentTree: ExtendedNodeData,
+  rootPath: string
+): Promise<ExtendedNodeData> {
+  return await getTree(currentTree, rootPath)
 }
 
 export const emptyFolderNodeData = (
@@ -82,19 +89,19 @@ export async function getTree(
 ): Promise<ExtendedNodeData> {
   const isWindows = os.platform() === 'win32'
   const pathDelimiter = isWindows ? '\\' : '/'
-  const schemasDict: StringDictKVs | any = {}
+  const schemasDict: any = {}
 
   // Get an array of all files and directories in the passed directory using fs.readdirSync
-  const schemas = filehandling.getJsonSchemaFileHandles(directoryPath)
+  const schemas = filehandling.getSchemaHandles(directoryPath)
   //const directoryList = filehandling.getAllDirectories(directoryPath  + "/Content");
-  const instances = filehandling.getAllYamlFileInstances(directoryPath + '/Content')
+  const instances = filehandling.getInstancesHandles(directoryPath + '/Content')
   // Create the full path of the file/directory by concatenating the passed directory and file/directory name
 
   let createdItemsCounter = 1
 
   // match each instance to a schema
   for (const fileHandle of Array.from(schemas)) {
-    const file = await filehandling.loadJSONData(path.join(fileHandle.parentPath, fileHandle.name))
+    const file = await filehandling.loadFile(path.join(fileHandle.parentPath, fileHandle.name))
     schemasDict[fileHandle.name] = file
   }
 
@@ -127,7 +134,7 @@ export async function getTree(
       file,
       pathDelimiter
     )
-    const childInstanceData = await filehandling.loadYAMLData(path.join(file.parentPath, file.name))
+    const childInstanceData = await filehandling.loadFile(path.join(file.parentPath, file.name))
     const childInstance = newChildFileNode(
       createdItemsCounter,
       file.name,
@@ -149,7 +156,7 @@ export async function getTree(
 }
 
 async function findSchemaByChildParentFolder(
-  schemasDict: StringDictKVs | any,
+  schemasDict: any,
   instanceFileInfo: fs.Dirent,
   pathDelimiter
 ): Promise<Schema> {

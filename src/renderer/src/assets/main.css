@@ -127,7 +127,7 @@ code {
 
 .horizontalOrderedRight {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: auto auto auto;
   align-items: auto;
   justify-content: flex-end;
   margin-right: 10px;
@@ -174,7 +174,7 @@ code {
   position:fixed;
   bottom: 0px;
   left: 120px;
-  width: 600px;
+  width: 760px;
   height: 100px;
 }
 

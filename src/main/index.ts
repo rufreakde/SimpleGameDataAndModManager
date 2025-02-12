@@ -1,33 +1,13 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
-import { getTree, emptyFolderNodeData, Dictionary } from './tree'
+import { initTree, loadTree, ExtendedNodeData } from './tree'
+import { Settings, initSettings } from './settings'
 
-// Settings object to send over
-async function getSettings() {
-  let settings: Dictionary = {
-    paths: {
-      root: `${app.getAppPath()}`
-    },
-    tree: emptyFolderNodeData('root', {
-      title: 'Game Data Editor',
-      description: 'Choose a file on the left to edit. Submit to save.',
-      type: 'object',
-      properties: {}
-    })
-  }
-
-  if (!settings.paths) {
-    alert(`Error no relevant Data found in path location; ${app.getAppPath()}`)
-    return settings
-  }
-
-  settings.tree = await getTree(settings.tree, settings.paths.root)
-
-  return settings
-}
+let editorSettings: Settings
+let editorTree: ExtendedNodeData
 
 function createWindow(): void {
   // Create the browser window.
@@ -44,8 +24,12 @@ function createWindow(): void {
   })
 
   mainWindow.on('ready-to-show', () => {
-    // send data to renderer thread
-    ipcMain.handle('settings', getSettings)
+    // Start Listener:
+    editorSettings = initSettings(app.getAppPath())
+    editorTree = initTree()
+    ipcMain.handle('change:rootDir', settingsChangeRootDir)
+    ipcMain.handle('load:tree', treeLoadEventListener)
+    ipcMain.handle('click:tree', treeClickedEventListener)
     mainWindow.show()
   })
 
@@ -53,6 +37,27 @@ function createWindow(): void {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
+
+  // event wrappers
+  async function settingsChangeRootDir() {
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openDirectory']
+    })
+    if (!canceled) {
+      editorSettings = initSettings(filePaths[0])
+      return editorSettings
+    }
+
+    return editorSettings
+  }
+  async function treeLoadEventListener() {
+    editorTree = await loadTree(editorTree, editorSettings.paths.root)
+    return editorTree
+  }
+
+  async function treeClickedEventListener() {
+    return editorTree
+  }
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
