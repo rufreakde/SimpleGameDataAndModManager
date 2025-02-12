@@ -23,6 +23,8 @@ import { IconComponents } from 'react-folder-tree'
 
 import * as React from 'react'
 
+import fileHandling from '../../../src/main/filehandling'
+
 const textRootPathId = 'rootPath'
 const consoleTextId = 'consoleLog'
 const Form = withTheme(Theme)
@@ -119,6 +121,13 @@ function App(): JSX.Element {
   }
 
   const onSaveClick = () => {
+    console.log(`Save to file path: ${treeState.customDataHolder?.instanceData.Path}`)
+    // FIXME cant call here to write directly to disk instead we need to send an event
+    // with the save data so that it then sends it over
+    // fileHandling.saveJSONData(
+    //   treeState.customDataHolder?.instanceData,
+    //   treeState.customDataHolder?.instanceData.Path
+    // )
     alert('Saved to filesystem')
     writeIntoConsole('Loaded from filesystem')
   }
