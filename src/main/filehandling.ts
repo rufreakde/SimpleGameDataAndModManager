@@ -1,4 +1,4 @@
-import { parse } from 'yaml'
+import { parse, stringify } from 'yaml'
 
 import * as fs from 'fs'
 
@@ -62,7 +62,7 @@ const filehandling = {
     fs.writeFileSync(filePath, text)
   },
   saveYAMLData(data: any, filePath: string) {
-    const text = JSON.stringify(data)
+    const text = stringify(data)
     fs.writeFileSync(filePath, text)
   },
   // LOAD

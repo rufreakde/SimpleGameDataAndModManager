@@ -1,6 +1,5 @@
----
 Type: unit
-Path: "./Content/data/units/air/jet"
+Path: ./Content/data/units/air/jet
 Name: Jet
 ProductionClass: Air
 LuckModifier: 10

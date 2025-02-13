@@ -60,8 +60,9 @@ function App(): JSX.Element {
     alert('Loaded from filesystem')
   }
 
-  // FORM
+  // Main Buttons Below
   const onSaveClick = () => {
+    window['electronAPI'].treeSaveEventListener(treeState)
     alert('Saved to filesystem')
   }
   const onFormChange = (a: any, b: any) => {

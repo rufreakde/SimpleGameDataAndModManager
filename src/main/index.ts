@@ -3,7 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
-import { initTree, loadTree, ExtendedNodeData } from './tree'
+import { initTree, loadTree, ExtendedNodeData, saveTree } from './tree'
 import { Settings, initSettings } from './settings'
 
 let editorSettings: Settings
@@ -30,6 +30,7 @@ function createWindow(): void {
     ipcMain.handle('change:rootDir', settingsChangeRootDir)
     ipcMain.handle('load:tree', treeLoadEventListener)
     ipcMain.handle('click:tree', treeClickedEventListener)
+    ipcMain.handle('save:tree', treeSaveEventListener)
     mainWindow.show()
   })
 
@@ -57,6 +58,11 @@ function createWindow(): void {
 
   async function treeClickedEventListener() {
     return editorTree
+  }
+
+  async function treeSaveEventListener(_: any, ...args: any) {
+    editorTree = args[0] // store to main thread updated
+    await saveTree(args[0])
   }
 
   // HMR for renderer base on electron-vite cli.

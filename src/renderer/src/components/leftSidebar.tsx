@@ -1,13 +1,20 @@
 import { ExtendedNodeData } from '../../../main/tree'
 import FolderTree from 'react-folder-tree'
+import deepEqual from 'deep-equal'
 
 function CustomTree(props: {
   treeState: ExtendedNodeData
   setState: React.Dispatch<React.SetStateAction<ExtendedNodeData>>
 }): JSX.Element {
-  const onTreeStateChange = (state: ExtendedNodeData, event: unknown) => {
+  const onTreeStateChange = (state: ExtendedNodeData, event: any) => {
     // whenever the tree changes not the selection state of children. (e.g. fold out)
     console.log(`${state} + ${event}`)
+    if (deepEqual(props.treeState, state)) {
+      return
+    }
+
+    //props.treeState = state
+    props.setState(state as ExtendedNodeData)
   }
 
   const onNameClick = (opts: { defaultOnClick: () => void; nodeData: ExtendedNodeData }) => {
@@ -22,24 +29,28 @@ function CustomTree(props: {
       ...data
     } = opts.nodeData
 
-    window['electronAPI'].treeClickedEventListener().then((val: ExtendedNodeData) => {
-      if (val.customDataHolder) {
-        val.customDataHolder.jsonSchema.schemaName =
+    window['electronAPI'].treeClickedEventListener().then((state: ExtendedNodeData) => {
+      if (state.customDataHolder) {
+        // FIXME this needs to store from current view to actual resource value in tree
+        // that way then when saved to tree the tree is updated not only the root element which contains the customData which is displayed in thef FORM
+        // remember the display in the form is root.data.customdata not the actual object which we wanted to edit its a copy moved to the displayed form object
+        state.customDataHolder.jsonSchema.schemaName =
           data.customDataHolder?.jsonSchema.schemaName || ''
 
-        val.customDataHolder.jsonSchema.fullFolderPath =
+        state.customDataHolder.jsonSchema.fullFolderPath =
           data.customDataHolder?.jsonSchema.fullFolderPath || ''
 
-        val.customDataHolder.jsonSchema.referenceData =
+        state.customDataHolder.jsonSchema.referenceData =
           data.customDataHolder?.jsonSchema.referenceData || {}
 
-        val.customDataHolder.instanceData = data.customDataHolder?.instanceData || {}
+        state.customDataHolder.instanceData = data.customDataHolder?.instanceData || {}
 
         console.log(`CLICKED on ${name}:${data.customDataHolder?.jsonSchema.schemaName}`)
         console.log(`CLICKED on ${name}:${data.customDataHolder?.instanceData}`)
       }
 
-      props.setState(val as ExtendedNodeData)
+      //props.treeState = state
+      props.setState(state as ExtendedNodeData)
     })
 
     opts.defaultOnClick()

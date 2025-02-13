@@ -33,13 +33,6 @@ export function initTree(): ExtendedNodeData {
   })
 }
 
-export async function loadTree(
-  currentTree: ExtendedNodeData,
-  rootPath: string
-): Promise<ExtendedNodeData> {
-  return await getTree(currentTree, rootPath)
-}
-
 export const emptyFolderNodeData = (
   nameOfList: string,
   jsonSchemaValue: RJSFSchema
@@ -49,6 +42,7 @@ export const emptyFolderNodeData = (
     name: nameOfList,
     children: [],
     customDataHolder: {
+      isFolder: true,
       jsonSchema: {
         schemaName: '',
         fullFolderPath: '',
@@ -83,7 +77,23 @@ function AddChildAt(
   return createdItemsCounter + 1
 }
 
-export async function getTree(
+export async function saveTree(renderThreadTree: ExtendedNodeData) {
+  saveSubtree(renderThreadTree) // save to filesystem
+}
+
+function saveSubtree(passedNode: ExtendedNodeData) {
+  if (passedNode.customDataHolder?.isFolder || passedNode.name === 'root') {
+    passedNode.children?.forEach((node) => {
+      saveSubtree(node)
+    })
+  } else {
+    const alwaysDefinedPath = passedNode.customDataHolder!.fullFolderPath!
+    const filePath = path.join(alwaysDefinedPath, passedNode.name)
+    filehandling.saveFile(passedNode.customDataHolder?.instanceData, filePath)
+  }
+}
+
+export async function loadTree(
   passedRootRef: ExtendedNodeData,
   directoryPath: string
 ): Promise<ExtendedNodeData> {

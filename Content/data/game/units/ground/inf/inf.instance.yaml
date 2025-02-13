@@ -1,16 +1,15 @@
----
 Type: unit
 Path: ./Content/data/units/air/jet
 Name: Inf
-ProductionClass: Ground #air ground water
+ProductionClass: Ground
 LuckModifier: 10
 Movement:
   BaseMovement: 5
   CanWalkDrive: false
   CanSwim: false
   CanFly: true
-  Weight: 3 # number
-  Tires: HumanLegs # RubberTires Chains HumanLegs RoboticLegs Hover Fly
+  Weight: 3
+  Tires: HumanLegs
 Armor: LightInfantry
 ArmorModifier: 0
 PrimaryWeapon:
