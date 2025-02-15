@@ -8,12 +8,13 @@ function CustomTree(props: {
 }): JSX.Element {
   const onTreeStateChange = (state: ExtendedNodeData, event: any) => {
     // whenever the tree changes not the selection state of children. (e.g. fold out)
-    console.log(`${state} + ${event}`)
+
     if (deepEqual(props.treeState, state)) {
       return
     }
 
     //props.treeState = state
+    console.log(`Update Tree State`)
     props.setState(state as ExtendedNodeData)
   }
 
@@ -42,8 +43,7 @@ function CustomTree(props: {
 
         state.customDataHolder.instanceData = data.customDataHolder?.instanceData || {}
 
-        console.log(`CLICKED on ${name}:${data.customDataHolder?.jsonSchema.schemaName}`)
-        console.log(`CLICKED on ${name}:${data.customDataHolder?.instanceData}`)
+        console.log(`CLICKED on ${name}:${data.customDataHolder?.instanceData.Path}`)
       }
 
       //props.treeState = state

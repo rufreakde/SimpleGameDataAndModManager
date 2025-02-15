@@ -63,19 +63,25 @@ function App(): JSX.Element {
 
   // Main Buttons Below
   const onSaveClick = () => {
-    window['electronAPI'].treeSaveEventListener(treeState)
+    window['electronAPI'].treeSaveEventListener(treeState).then(() => {
+      window['electronAPI'].treeLoadEventListener().then((val: ExtendedNodeData) => {
+        // reset ui
+        setTreeState(val as ExtendedNodeData)
+      })
+    })
+
     alert('Saved to filesystem')
   }
-  const onFormChange = (a: any, b: any) => {
+  const onFormChange = (formObject: any, _: any) => {
     // set value to correct node!
     // find subtree and push to that value
-    const instanceData = a.formData
+    const instanceData = formObject.formData
     let changedNode: ExtendedNodeData | null = null
     const copyToCompareChanges = JSON.parse(JSON.stringify(treeState))
 
     if (instanceData && instanceData.Name && instanceData.Path) {
-      const schema = a.schema
-      const uischema = a.uiSchema
+      const schema = formObject.schema
+      const uischema = formObject.uiSchema
       // find in current tree use function to find file
       changedNode = updateChildNode(
         treeState,
@@ -104,6 +110,7 @@ function App(): JSX.Element {
     setTabSelected(newValue)
   }
 
+  let treeDataReference = JSON.stringify(treeState.customDataHolder?.instanceData, null, 2)
   // UI
   return (
     <>
@@ -148,7 +155,9 @@ function App(): JSX.Element {
                 />
               </ThemeProvider>
             </TabPanel>
-            <TabPanel value="2">TODO</TabPanel>
+            <TabPanel value="2">
+              <pre id="json">{treeDataReference}</pre>
+            </TabPanel>
             <TabPanel value="3">TODO</TabPanel>
           </TabContext>
         </div>

@@ -61,7 +61,7 @@ function createWindow(): void {
   }
 
   async function treeSaveEventListener(_: any, ...args: any) {
-    editorTree = args[0] // store to main thread updated
+    editorTree = JSON.parse(JSON.stringify(args[0])) // store to main thread updated
     await saveTree(args[0])
   }
 

@@ -2,7 +2,7 @@ Type: unit
 Path: .\Content\data\game\units\ground\inf
 Name: Inf
 ProductionClass: Ground
-LuckModifier: 9
+LuckModifier: 11
 Armor: LightInfantry
 ArmorModifier: 0
 PrimaryWeapon:

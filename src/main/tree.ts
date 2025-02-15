@@ -66,7 +66,6 @@ function AddChildAt(
     }
   )
   if (foundItselfIndex !== -1) {
-    //console.log(`SKIP    \t\t- found itself(${childToAdd.name}))`)
     const itself = parentsInDepth[depth - 1].children!.at(foundItselfIndex)
     parentsInDepth.push(itself || childToAdd)
     return createdItemsCounter
