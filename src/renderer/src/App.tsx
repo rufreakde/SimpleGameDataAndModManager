@@ -10,12 +10,13 @@ import { withTheme } from '@rjsf/core'
 import { Theme } from '@rjsf/mui'
 import ObjectFieldTemplate from './ObjectFieldTemplate'
 import validator from '@rjsf/validator-ajv8'
-import { ExtendedNodeData } from '../../main/tree'
+import { ExtendedNodeData, updateChildNode } from '../../main/tree'
 import { Settings } from '../../main/settings'
 import * as React from 'react'
 import { defaultTheme } from './ui/theme'
 import CustomTree from './components/leftSidebar'
 import { useState } from 'react'
+import deepEqual from 'deep-equal'
 
 const textRootPathId = 'rootPath'
 const Form = withTheme(Theme)
@@ -66,7 +67,32 @@ function App(): JSX.Element {
     alert('Saved to filesystem')
   }
   const onFormChange = (a: any, b: any) => {
-    return console.log('Form data changed: ', a, b)
+    // set value to correct node!
+    // find subtree and push to that value
+    const instanceData = a.formData
+    let changedNode: ExtendedNodeData | null = null
+    const copyToCompareChanges = JSON.parse(JSON.stringify(treeState))
+
+    if (instanceData && instanceData.Name && instanceData.Path) {
+      const schema = a.schema
+      const uischema = a.uiSchema
+      // find in current tree use function to find file
+      changedNode = updateChildNode(
+        treeState,
+        instanceData.Path,
+        instanceData.Name,
+        instanceData,
+        schema,
+        uischema
+      )
+    }
+
+    if (deepEqual(treeState, copyToCompareChanges)) {
+      return console.log('No changes!')
+    }
+
+    setTreeState(treeState)
+    return console.log('Form data changed: ', changedNode)
   }
   const onSubmit = (a: any, b: any) => {
     return console.log('Form data submitted: ', a, b)

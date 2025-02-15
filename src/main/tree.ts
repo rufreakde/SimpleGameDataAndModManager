@@ -4,6 +4,7 @@ import * as os from 'os'
 
 import * as fs from 'fs'
 import path from 'path'
+import pathBrowserfied from 'path-browserify'
 
 import filehandling from './filehandling'
 
@@ -77,13 +78,15 @@ function AddChildAt(
   return createdItemsCounter + 1
 }
 
+// backend functionality
+// path from nodejs
 export async function saveTree(renderThreadTree: ExtendedNodeData) {
   saveSubtree(renderThreadTree) // save to filesystem
 }
 
 function saveSubtree(passedNode: ExtendedNodeData) {
   if (passedNode.customDataHolder?.isFolder || passedNode.name === 'root') {
-    passedNode.children?.forEach((node) => {
+    passedNode.children?.forEach((node: ExtendedNodeData) => {
       saveSubtree(node)
     })
   } else {
@@ -91,6 +94,77 @@ function saveSubtree(passedNode: ExtendedNodeData) {
     const filePath = path.join(alwaysDefinedPath, passedNode.name)
     filehandling.saveFile(passedNode.customDataHolder?.instanceData, filePath)
   }
+}
+
+// frontend functionality
+// pathBrowserfied
+export function updateChildNode(
+  renderThreadTree: ExtendedNodeData,
+  folderPathAsKey: string,
+  fileNameAsKey: string,
+  newInstanceData: any,
+  newSchema: any,
+  newUiSchema: any
+) {
+  const normalizedPathKey = pathBrowserfied.posix.normalize(
+    folderPathAsKey.replaceAll('\\', pathBrowserfied.posix.sep)
+  )
+
+  return updateChildNodeSubtree(
+    renderThreadTree,
+    normalizedPathKey,
+    fileNameAsKey,
+    newInstanceData,
+    newSchema,
+    newUiSchema
+  )
+}
+
+function updateChildNodeSubtree(
+  passedNode: ExtendedNodeData,
+  folderPathAsKey: string,
+  fileNameAsKey: string,
+  newInstanceData: any,
+  newSchema: any,
+  newUiSchema: any
+): ExtendedNodeData | null {
+  if (
+    (passedNode.customDataHolder?.isFolder && passedNode.children) ||
+    (passedNode.name === 'root' && passedNode.children)
+  ) {
+    for (var node of passedNode.children) {
+      let found = updateChildNodeSubtree(
+        node,
+        folderPathAsKey,
+        fileNameAsKey,
+        newInstanceData,
+        newSchema,
+        newUiSchema
+      )
+
+      if (found) {
+        return found
+      }
+    }
+  } else if (!passedNode.customDataHolder || !passedNode.customDataHolder.fullFolderPath) {
+    console.error('ERROR something is wrongly maintained in this instance object')
+  } else {
+    const normalizedNodePath = pathBrowserfied.posix.normalize(
+      passedNode.customDataHolder.fullFolderPath.replaceAll('\\', pathBrowserfied.posix.sep)
+    )
+
+    if (
+      normalizedNodePath.includes(folderPathAsKey) &&
+      passedNode.name.includes(fileNameAsKey.toLowerCase())
+    ) {
+      passedNode.customDataHolder.instanceData = newInstanceData
+      passedNode.customDataHolder.jsonSchema = newSchema
+      // TODO UI schema update?
+      return passedNode
+    }
+  }
+
+  return null
 }
 
 export async function loadTree(

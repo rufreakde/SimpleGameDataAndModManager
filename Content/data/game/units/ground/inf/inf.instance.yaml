@@ -1,8 +1,24 @@
 Type: unit
-Path: ./Content/data/units/air/jet
+Path: .\Content\data\game\units\ground\inf
 Name: Inf
 ProductionClass: Ground
-LuckModifier: 10
+LuckModifier: 9
+Armor: LightInfantry
+ArmorModifier: 0
+PrimaryWeapon:
+  BaseDamage: 6
+  canHitGround: true
+  canHitGroundSpecial: false
+  Calibre: Light
+  canHitAir: false
+  canHitAirSpecial: false
+SecondaryWeapon:
+  BaseDamage: 1
+  canHitGround: true
+  canHitGroundSpecial: false
+  Calibre: Light
+  canHitAir: false
+  canHitAirSpecial: false
 Movement:
   BaseMovement: 5
   CanWalkDrive: false
@@ -10,19 +26,3 @@ Movement:
   CanFly: true
   Weight: 3
   Tires: HumanLegs
-Armor: LightInfantry
-ArmorModifier: 0
-PrimaryWeapon:
-  Calibre: Light
-  BaseDamage: 6
-  canHitGround: true
-  canHitGroundSpecial: false
-  canHitAir: false
-  canHitAirSpecial: false
-SecondaryWeapon:
-  Calibre: Light
-  BaseDamage: 1
-  canHitGround: true
-  canHitGroundSpecial: false
-  canHitAir: false
-  canHitAirSpecial: false

@@ -31,9 +31,6 @@ function CustomTree(props: {
 
     window['electronAPI'].treeClickedEventListener().then((state: ExtendedNodeData) => {
       if (state.customDataHolder) {
-        // FIXME this needs to store from current view to actual resource value in tree
-        // that way then when saved to tree the tree is updated not only the root element which contains the customData which is displayed in thef FORM
-        // remember the display in the form is root.data.customdata not the actual object which we wanted to edit its a copy moved to the displayed form object
         state.customDataHolder.jsonSchema.schemaName =
           data.customDataHolder?.jsonSchema.schemaName || ''
 

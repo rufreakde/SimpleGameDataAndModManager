@@ -1,8 +1,24 @@
 Type: unit
-Path: ./Content/data/units/air/jet
+Path: .\Content\data\game\units\air\jet
 Name: Jet
 ProductionClass: Air
-LuckModifier: 10
+LuckModifier: 9
+Armor: MediumVehicle
+ArmorModifier: 0
+PrimaryWeapon:
+  BaseDamage: 8
+  canHitGround: false
+  canHitGroundSpecial: false
+  Calibre: Heavy
+  canHitAir: true
+  canHitAirSpecial: true
+SecondaryWeapon:
+  BaseDamage: 3
+  canHitGround: false
+  canHitGroundSpecial: false
+  Calibre: Light
+  canHitAir: true
+  canHitAirSpecial: true
 Movement:
   BaseMovement: 5
   CanWalkDrive: false
@@ -10,19 +26,3 @@ Movement:
   CanFly: true
   Weight: 3
   Tires: Fly
-Armor: MediumVehicle
-ArmorModifier: 0
-PrimaryWeapon:
-  Calibre: Heavy
-  BaseDamage: 8
-  canHitGround: false
-  canHitGroundSpecial: false
-  canHitAir: true
-  canHitAirSpecial: true
-SecondaryWeapon:
-  Calibre: Light
-  BaseDamage: 3
-  canHitGround: false
-  canHitGroundSpecial: false
-  canHitAir: true
-  canHitAirSpecial: true
