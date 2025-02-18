@@ -207,7 +207,7 @@ function App(): JSX.Element {
               <pre id="json">{formDataInstanceReference}</pre>
             </TabPanel>
             <TabPanel value="3">TODO</TabPanel>
-            <TabPanel value="3">
+            <TabPanel value="4">
               <pre id="json">{treeStateReference}</pre>
             </TabPanel>
           </TabContext>
