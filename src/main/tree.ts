@@ -19,6 +19,7 @@ export interface customDataHolder {
   isFolder?: boolean
   jsonSchema: Schema
   instanceData?: any
+  uiSchema: any
 }
 
 export interface ExtendedNodeData extends NodeData {
@@ -44,6 +45,7 @@ export const emptyFolderNodeData = (
     children: [],
     customDataHolder: {
       isFolder: true,
+      uiSchema: {},
       jsonSchema: {
         schemaName: '',
         fullFolderPath: '',
@@ -157,8 +159,12 @@ function updateChildNodeSubtree(
       passedNode.name.includes(fileNameAsKey.toLowerCase())
     ) {
       passedNode.customDataHolder.instanceData = newInstanceData
-      passedNode.customDataHolder.jsonSchema = newSchema
-      // TODO UI schema update?
+      passedNode.customDataHolder.jsonSchema = {
+        schemaName: passedNode.customDataHolder.jsonSchema.schemaName, // 'TODO FIXME where to get name from',
+        fullFolderPath: passedNode.customDataHolder.jsonSchema.fullFolderPath, //'TODO FIXME where to get path from',
+        referenceData: newSchema
+      }
+      passedNode.customDataHolder.uiSchema = newUiSchema
       return passedNode
     }
   }
@@ -296,6 +302,7 @@ function newChildFileNode(
       isFolder: false,
       fullFolderPath: path,
       instanceData: instanceData,
+      uiSchema: {},
       jsonSchema: {
         schemaName: schemaName,
         fullFolderPath: schemaPath,
@@ -315,6 +322,7 @@ function newChildFolderNode(_theID: number, folderName: string, path: string): E
     customDataHolder: {
       isFolder: true,
       fullFolderPath: path,
+      uiSchema: {},
       jsonSchema: {
         schemaName: '',
         fullFolderPath: '',

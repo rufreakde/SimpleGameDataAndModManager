@@ -10,7 +10,7 @@ import { withTheme } from '@rjsf/core'
 import { Theme } from '@rjsf/mui'
 import ObjectFieldTemplate from './ObjectFieldTemplate'
 import validator from '@rjsf/validator-ajv8'
-import { ExtendedNodeData, updateChildNode } from '../../main/tree'
+import { customDataHolder, ExtendedNodeData, updateChildNode } from '../../main/tree'
 import { Settings } from '../../main/settings'
 import * as React from 'react'
 import { defaultTheme } from './ui/theme'
@@ -24,15 +24,16 @@ const Form = withTheme(Theme)
 const darkTheme = defaultTheme()
 
 function App(): JSX.Element {
-  // SETTINGS for theming etc
+  // STATES
+  // SETTINGS
   const [settingsState, setSettingsState] = useState<Settings>()
-  const customLog = (type) => console.log.bind(console, type)
 
   // TREE
   const [treeState, setTreeState] = useState<ExtendedNodeData>({
     name: 'root',
     children: [],
     customDataHolder: {
+      uiSchema: {},
       jsonSchema: {
         schemaName: 'currentlyChosenSchema',
         fullFolderPath: 'initial',
@@ -41,21 +42,40 @@ function App(): JSX.Element {
     }
   })
 
+  // FORM
+  const [formState, setFormState] = useState<customDataHolder>({
+    fullFolderPath: 'Not Set Yet',
+    isFolder: false,
+    jsonSchema: {
+      schemaName: 'currentlyChosenSchema',
+      fullFolderPath: 'initial',
+      referenceData: {}
+    },
+    uiSchema: {
+      'ui:submitButtonOptions': { norender: true }
+    },
+    instanceData: {
+      Description: 'Load folder tree to display necessary information'
+    }
+  })
+
+  const customLog = (type) => console.log.bind(console, type)
+
   const onChangeRootPath = () => {
-    window['electronAPI'].settingsChangeRootDir().then((val: Settings) => {
+    window['electronAPI'].settingsChangeRootDir().then((tree: Settings) => {
       // update PATH in UI
       const filePathElement = document.getElementById(textRootPathId)
       if (filePathElement != null) {
-        filePathElement.innerText = val.paths.root
+        filePathElement.innerText = tree.paths.root
       }
-      setSettingsState(val)
+      setSettingsState(tree)
     })
   }
 
   const onRefreshTreeClick = () => {
-    window['electronAPI'].treeLoadEventListener().then((val: ExtendedNodeData) => {
+    window['electronAPI'].treeLoadEventListener().then((tree: ExtendedNodeData) => {
       // Update tree
-      setTreeState(val as ExtendedNodeData)
+      setTreeState(tree)
     })
 
     alert('Loaded from filesystem')
@@ -63,45 +83,66 @@ function App(): JSX.Element {
 
   // Main Buttons Below
   const onSaveClick = () => {
-    window['electronAPI'].treeSaveEventListener(treeState).then(() => {
-      window['electronAPI'].treeLoadEventListener().then((val: ExtendedNodeData) => {
-        // reset ui
-        setTreeState(val as ExtendedNodeData)
-      })
+    window['electronAPI'].treeSaveEventListener(treeState).then((tree: ExtendedNodeData) => {
+      // FIXME as soon as I update the state here after save it crashes but why????
+      setTreeState(tree)
+
+      if (temporaryNotSubmittetChangedWorkaround) {
+        setFormState(temporaryNotSubmittetChangedWorkaround)
+      }
     })
 
     alert('Saved to filesystem')
   }
+
+  // dont try trz to uptimize nor fix this workaround the state handling of the FORM is just stupid
+  // with this in memory holder we store it until UI re renders on changes
+  // and later on on a UI re render we just do a set state :) e.g. Save button!
+  let temporaryNotSubmittetChangedWorkaround: customDataHolder | null = null
+
   const onFormChange = (formObject: any, _: any) => {
     // set value to correct node!
     // find subtree and push to that value
-    const instanceData = formObject.formData
-    let changedNode: ExtendedNodeData | null = null
-    const copyToCompareChanges = JSON.parse(JSON.stringify(treeState))
+    const newInstanceData = formObject.formData
+    const newSchema = formObject.schema
+    const newUiSchema = formObject.uiSchema
 
-    if (instanceData && instanceData.Name && instanceData.Path) {
-      const schema = formObject.schema
-      const uischema = formObject.uiSchema
-      // find in current tree use function to find file
-      changedNode = updateChildNode(
-        treeState,
-        instanceData.Path,
-        instanceData.Name,
-        instanceData,
-        schema,
-        uischema
-      )
+    if (!newInstanceData?.Name || !newInstanceData?.Path) {
+      return console.log('Error instance not found!')
     }
 
-    if (deepEqual(treeState, copyToCompareChanges)) {
+    if (deepEqual(formState?.instanceData, newInstanceData)) {
       return console.log('No changes!')
     }
 
+    // find in current tree use function to find file
+    const changedNode = updateChildNode(
+      treeState,
+      newInstanceData.Path,
+      newInstanceData.Name,
+      newInstanceData,
+      newSchema,
+      newUiSchema
+    )
+
     setTreeState(treeState)
-    return console.log('Form data changed: ', changedNode)
-  }
-  const onSubmit = (a: any, b: any) => {
-    return console.log('Form data submitted: ', a, b)
+
+    // this section here is just because setFormState fucks up input of FORM dnk why fuck it...
+    const updatedFormData: customDataHolder = {
+      fullFolderPath: formState.fullFolderPath,
+      isFolder: formState.isFolder,
+      uiSchema: newUiSchema,
+      jsonSchema: {
+        fullFolderPath: formState.jsonSchema.fullFolderPath, // where to get that one from?
+        referenceData: newSchema,
+        schemaName: formState.jsonSchema.schemaName // where to get that one from?
+      },
+      instanceData: newInstanceData
+    }
+
+    temporaryNotSubmittetChangedWorkaround = updatedFormData
+
+    return console.log('Form data updated: ', changedNode)
   }
 
   // TAB
@@ -110,12 +151,19 @@ function App(): JSX.Element {
     setTabSelected(newValue)
   }
 
-  let treeDataReference = JSON.stringify(treeState.customDataHolder?.instanceData, null, 2)
+  let formDataInstanceReference = JSON.stringify(formState.instanceData, null, 2)
+
+  let treeStateReference = JSON.stringify(treeState, null, 2)
   // UI
   return (
     <>
       <div className="backgroundImage">
-        <CustomTree treeState={treeState} setState={setTreeState}></CustomTree>
+        <CustomTree
+          treeState={treeState}
+          setTreeState={setTreeState}
+          formState={formState}
+          setFormState={setFormState}
+        ></CustomTree>
 
         <div className="pathView padding10px">
           Project Path: <strong id="rootPath"></strong>
@@ -141,13 +189,12 @@ function App(): JSX.Element {
                 <CssBaseline />
                 <Form
                   key={new Date().getTime()}
-                  children={true} // hide submit button
-                  schema={treeState.customDataHolder?.jsonSchema?.referenceData}
-                  // uiSchema={{}}
-                  formData={treeState.customDataHolder?.instanceData}
+                  children={true}
+                  schema={formState.jsonSchema?.referenceData}
+                  uiSchema={formState.uiSchema}
+                  formData={formState['instanceData']}
                   validator={validator}
                   onChange={onFormChange}
-                  onSubmit={onSubmit}
                   onError={customLog('errors')}
                   templates={{
                     ObjectFieldTemplate: ObjectFieldTemplate
@@ -156,9 +203,11 @@ function App(): JSX.Element {
               </ThemeProvider>
             </TabPanel>
             <TabPanel value="2">
-              <pre id="json">{treeDataReference}</pre>
+              <pre id="json">{formDataInstanceReference}</pre>
             </TabPanel>
-            <TabPanel value="3">TODO</TabPanel>
+            <TabPanel value="3">
+              <pre id="json">{treeStateReference}</pre>
+            </TabPanel>
           </TabContext>
         </div>
 

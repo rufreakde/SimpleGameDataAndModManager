@@ -1,15 +1,17 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import { ExtendedNodeData } from '../main/tree'
+import { Settings } from '../main/settings'
 
 // Custom APIs for renderer
 const api = {}
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  settingsChangeRootDir: () => ipcRenderer.invoke('change:rootDir'),
-  treeLoadEventListener: () => ipcRenderer.invoke('load:tree'),
-  treeClickedEventListener: () => ipcRenderer.invoke('click:tree'),
-  treeSaveEventListener: (treeFromRenderThread: ExtendedNodeData) =>
+  settingsChangeRootDir: (): Promise<Settings> => ipcRenderer.invoke('change:rootDir'),
+  treeLoadEventListener: (): Promise<ExtendedNodeData> => ipcRenderer.invoke('load:tree'),
+  treeClickedEventListener: (treeFromRenderThread: ExtendedNodeData): Promise<ExtendedNodeData> =>
+    ipcRenderer.invoke('click:tree', treeFromRenderThread),
+  treeSaveEventListener: (treeFromRenderThread: ExtendedNodeData): Promise<ExtendedNodeData> =>
     ipcRenderer.invoke('save:tree', treeFromRenderThread)
 })
 

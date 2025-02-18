@@ -40,7 +40,7 @@ function createWindow(): void {
   })
 
   // event wrappers
-  async function settingsChangeRootDir() {
+  async function settingsChangeRootDir(): Promise<Settings> {
     const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
       properties: ['openDirectory']
     })
@@ -51,18 +51,20 @@ function createWindow(): void {
 
     return editorSettings
   }
-  async function treeLoadEventListener() {
+  async function treeLoadEventListener(): Promise<ExtendedNodeData> {
     editorTree = await loadTree(editorTree, editorSettings.paths.root)
     return editorTree
   }
 
-  async function treeClickedEventListener() {
+  async function treeClickedEventListener(_: any, ...args: any): Promise<ExtendedNodeData> {
+    editorTree = args[0]
     return editorTree
   }
 
-  async function treeSaveEventListener(_: any, ...args: any) {
-    editorTree = JSON.parse(JSON.stringify(args[0])) // store to main thread updated
+  async function treeSaveEventListener(_: any, ...args: any): Promise<ExtendedNodeData> {
+    editorTree = args[0] // store to main thread updated
     await saveTree(args[0])
+    return editorTree
   }
 
   // HMR for renderer base on electron-vite cli.
