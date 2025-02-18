@@ -182,6 +182,7 @@ function App(): JSX.Element {
                 <Tab label="Edit" value="1" />
                 <Tab label="Data" value="2" />
                 <Tab label="Visuals" value="3" />
+                <Tab label="FileTree" value="4" />
               </TabList>
             </Box>
             <TabPanel value="1">
@@ -205,6 +206,7 @@ function App(): JSX.Element {
             <TabPanel value="2">
               <pre id="json">{formDataInstanceReference}</pre>
             </TabPanel>
+            <TabPanel value="3">TODO</TabPanel>
             <TabPanel value="3">
               <pre id="json">{treeStateReference}</pre>
             </TabPanel>
