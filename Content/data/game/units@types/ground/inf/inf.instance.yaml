@@ -1,5 +1,5 @@
 Type: unit
-Path: .\Content\data\game\units\ground\inf
+Path: .\Content\data\game\units@types\ground\inf
 Name: Inf
 ProductionClass: Ground
 LuckModifier: 10

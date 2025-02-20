@@ -1,9 +1,9 @@
 Type: unit
-Path: .\Content\data\game\units\air\jet
+Path: .\Content\data\game\units@types\air\jet
 Name: Jet
 ProductionClass: Air
 LuckModifier: 10
-Armor: LightVehicle
+Armor: MediumVehicle
 ArmorModifier: 0
 PrimaryWeapon:
   BaseDamage: 5

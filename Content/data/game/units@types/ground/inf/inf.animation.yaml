@@ -1,5 +1,5 @@
 type: animation
-path: ./Content/data/units/ground/inf
+path: ./Content/data/units@types/ground/inf
 spriteInfo:
   sizeInPixelXY: 64
   countMaximum:

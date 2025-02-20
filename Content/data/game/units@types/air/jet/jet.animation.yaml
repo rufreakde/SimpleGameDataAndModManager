@@ -1,5 +1,5 @@
 type: animation
-path: ./Content/data/units/air/jet
+path: ./Content/data/units@types/air/jet
 spriteInfo:
   sizeInPixelXY: 64
   countMaximum:
