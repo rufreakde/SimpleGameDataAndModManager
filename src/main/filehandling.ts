@@ -20,15 +20,8 @@ const filehandling = {
         recursive: true
       })
       .filter((x) =>
-        ['instance.yaml', 'instance.json'].some((keyword) => x.name.includes(keyword))
+        ['.instance.yaml', '.instance.json'].some((keyword) => x.name.includes(keyword))
       ),
-  getSchemaHandles: (path: string): fs.Dirent[] =>
-    fs
-      .readdirSync(path, {
-        encoding: 'utf-8',
-        withFileTypes: true
-      })
-      .filter((x) => ['schema.yaml', 'schema.json'].some((keyword) => x.name.includes(keyword))),
   getUiSchemaHandles: (path: string): fs.Dirent[] =>
     fs
       .readdirSync(path, {
@@ -38,6 +31,13 @@ const filehandling = {
       .filter((x) =>
         ['uischema.yaml', 'uischema.json'].some((keyword) => x.name.includes(keyword))
       ),
+  getSchemaHandles: (path: string): fs.Dirent[] =>
+    fs
+      .readdirSync(path, {
+        encoding: 'utf-8',
+        withFileTypes: true
+      })
+      .filter((x) => ['.schema.yaml', '.schema.json'].some((keyword) => x.name.includes(keyword))),
   getAnimationHandles: (path: string): fs.Dirent[] =>
     fs
       .readdirSync(path, {
@@ -45,7 +45,7 @@ const filehandling = {
         withFileTypes: true
       })
       .filter((x) =>
-        ['animation.yaml', 'animation.json'].some((keyword) => x.name.includes(keyword))
+        ['.animation.yaml', '.animation.json'].some((keyword) => x.name.includes(keyword))
       ),
   // PATH HANDLING
   isDirectory: (path: string): boolean => fs.lstatSync(path).isDirectory(),

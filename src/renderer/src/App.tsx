@@ -33,11 +33,11 @@ function App(): JSX.Element {
     name: 'root',
     children: [],
     customDataHolder: {
-      uiSchema: {},
       jsonSchema: {
         schemaName: 'currentlyChosenSchema',
         fullFolderPath: 'initial',
-        referenceData: {}
+        referenceData: {},
+        uiSchemaData: {}
       }
     }
   })
@@ -49,10 +49,10 @@ function App(): JSX.Element {
     jsonSchema: {
       schemaName: 'currentlyChosenSchema',
       fullFolderPath: 'initial',
-      referenceData: {}
-    },
-    uiSchema: {
-      'ui:submitButtonOptions': { norender: true }
+      referenceData: {},
+      uiSchemaData: {
+        'ui:submitButtonOptions': { norender: true }
+      }
     },
     instanceData: {
       Description: 'Load folder tree to display necessary information'
@@ -131,16 +131,17 @@ function App(): JSX.Element {
     const updatedFormData: customDataHolder = {
       fullFolderPath: formState.fullFolderPath,
       isFolder: formState.isFolder,
-      uiSchema: newUiSchema,
       jsonSchema: {
         fullFolderPath: formState.jsonSchema.fullFolderPath, // where to get that one from?
         referenceData: newSchema,
-        schemaName: formState.jsonSchema.schemaName // where to get that one from?
+        schemaName: formState.jsonSchema.schemaName, // where to get that one from?
+        uiSchemaData: newUiSchema
       },
       instanceData: newInstanceData
     }
 
-    temporaryNotSubmittetChangedWorkaround = updatedFormData
+    temporaryNotSubmittetChangedWorkaround = updatedFormData // WHENEVER UI IS REDRAWN the state gets reset because form does not set the real state unfortunately
+    // but we cant set real state because of input issues hence we store in memory and need to set then whenever UI redarws itself e.g. outside form UI events
 
     return console.log('Form data updated: ', changedNode)
   }
@@ -152,8 +153,9 @@ function App(): JSX.Element {
   }
 
   let formDataInstanceReference = JSON.stringify(formState.instanceData, null, 2)
-
   let treeStateReference = JSON.stringify(treeState, null, 2)
+  let uiSchemaStateReference = JSON.stringify(formState.jsonSchema.uiSchemaData, null, 2)
+
   // UI
   return (
     <>
@@ -183,6 +185,7 @@ function App(): JSX.Element {
                 <Tab label="Data" value="2" />
                 <Tab label="Visuals" value="3" />
                 <Tab label="FileTree" value="4" />
+                <Tab label="uiSchema" value="5" />
               </TabList>
             </Box>
             <TabPanel value="1">
@@ -192,7 +195,7 @@ function App(): JSX.Element {
                   key={new Date().getTime()}
                   children={true}
                   schema={formState.jsonSchema?.referenceData}
-                  uiSchema={formState.uiSchema}
+                  uiSchema={formState.jsonSchema?.uiSchemaData}
                   formData={formState['instanceData']}
                   validator={validator}
                   onChange={onFormChange}
@@ -209,6 +212,9 @@ function App(): JSX.Element {
             <TabPanel value="3">TODO</TabPanel>
             <TabPanel value="4">
               <pre id="json">{treeStateReference}</pre>
+            </TabPanel>
+            <TabPanel value="5">
+              <pre id="json">{uiSchemaStateReference}</pre>
             </TabPanel>
           </TabContext>
         </div>

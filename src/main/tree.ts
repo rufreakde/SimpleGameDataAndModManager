@@ -1,5 +1,5 @@
 import { NodeData } from 'react-folder-tree'
-import { RJSFSchema } from '@rjsf/utils'
+import { RJSFSchema, UiSchema } from '@rjsf/utils'
 import * as os from 'os'
 
 import * as fs from 'fs'
@@ -12,6 +12,7 @@ export interface Schema {
   schemaName: string
   fullFolderPath: string
   referenceData: RJSFSchema
+  uiSchemaData: UiSchema
 }
 
 export interface customDataHolder {
@@ -19,7 +20,6 @@ export interface customDataHolder {
   isFolder?: boolean
   jsonSchema: Schema
   instanceData?: any
-  uiSchema: any
 }
 
 export interface ExtendedNodeData extends NodeData {
@@ -27,17 +27,22 @@ export interface ExtendedNodeData extends NodeData {
 }
 
 export function initTree(): ExtendedNodeData {
-  return emptyFolderNodeData('root', {
-    title: 'Game Data Editor',
-    description: 'Choose a file on the left to edit. Submit to save.',
-    type: 'object',
-    properties: {}
-  })
+  return emptyFolderNodeData(
+    'root',
+    {
+      title: 'Game Data Editor',
+      description: 'Choose a file on the left to edit. Submit to save.',
+      type: 'object',
+      properties: {}
+    },
+    {}
+  )
 }
 
 export const emptyFolderNodeData = (
   nameOfList: string,
-  jsonSchemaValue: RJSFSchema
+  jsonSchemaValue: RJSFSchema,
+  uiSchemaValue: UiSchema
 ): ExtendedNodeData => {
   return {
     _id: 0,
@@ -45,11 +50,11 @@ export const emptyFolderNodeData = (
     children: [],
     customDataHolder: {
       isFolder: true,
-      uiSchema: {},
       jsonSchema: {
         schemaName: '',
         fullFolderPath: '',
-        referenceData: jsonSchemaValue
+        referenceData: jsonSchemaValue,
+        uiSchemaData: uiSchemaValue
       }
     }
   }
@@ -162,9 +167,9 @@ function updateChildNodeSubtree(
       passedNode.customDataHolder.jsonSchema = {
         schemaName: passedNode.customDataHolder.jsonSchema.schemaName, // 'TODO FIXME where to get name from',
         fullFolderPath: passedNode.customDataHolder.jsonSchema.fullFolderPath, //'TODO FIXME where to get path from',
-        referenceData: newSchema
+        referenceData: newSchema,
+        uiSchemaData: newUiSchema
       }
-      passedNode.customDataHolder.uiSchema = newUiSchema
       return passedNode
     }
   }
@@ -179,21 +184,30 @@ export async function loadTree(
   const isWindows = os.platform() === 'win32'
   const pathDelimiter = isWindows ? '\\' : '/'
   const schemasDict: any = {}
+  const uiSchemasDict: any = {}
 
   // Get an array of all files and directories in the passed directory using fs.readdirSync
   const schemas = filehandling.getSchemaHandles(directoryPath)
   //const directoryList = filehandling.getAllDirectories(directoryPath  + "/Content");
   const instances = filehandling.getInstancesHandles(directoryPath + '/Content')
   // Create the full path of the file/directory by concatenating the passed directory and file/directory name
+  const uiSchemas = filehandling.getUiSchemaHandles(directoryPath)
 
   let createdItemsCounter = 1
 
-  // match each instance to a schema
+  // load schema
   for (const fileHandle of Array.from(schemas)) {
     const file = await filehandling.loadFile(path.join(fileHandle.parentPath, fileHandle.name))
     schemasDict[fileHandle.name] = file
   }
 
+  // load uiSchemas
+  for (const fileHandle of Array.from(uiSchemas)) {
+    const file = await filehandling.loadFile(path.join(fileHandle.parentPath, fileHandle.name))
+    uiSchemasDict[fileHandle.name] = file
+  }
+
+  // match to instances
   for (const file of Array.from(instances)) {
     let parentsInDepth: ExtendedNodeData[] = []
     parentsInDepth.push(passedRootRef)
@@ -220,6 +234,7 @@ export async function loadTree(
     }
     const childInstanceMatchedSchema = await findSchemaByChildParentFolder(
       schemasDict,
+      uiSchemasDict,
       file,
       pathDelimiter
     )
@@ -231,7 +246,8 @@ export async function loadTree(
       childInstanceData,
       childInstanceMatchedSchema.schemaName,
       childInstanceMatchedSchema.fullFolderPath,
-      childInstanceMatchedSchema.referenceData
+      childInstanceMatchedSchema.referenceData,
+      childInstanceMatchedSchema.uiSchemaData
     )
     createdItemsCounter = AddChildAt(
       createdItemsCounter,
@@ -245,43 +261,66 @@ export async function loadTree(
 }
 
 async function findSchemaByChildParentFolder(
-  schemasDict: any,
+  schemasDict: RJSFSchema,
+  uiSchemasDict: UiSchema,
   instanceFileInfo: fs.Dirent,
   pathDelimiter
 ): Promise<Schema> {
   // from the path find the parent folder and use that as key to get the schema
   const folders = instanceFileInfo.parentPath.split(pathDelimiter)
   const schemaKeys = Object.keys(schemasDict)
+  const uiSchemaKeys = Object.keys(uiSchemasDict)
 
   const nameSplitByDot = instanceFileInfo.name.split('.')
   const fileTypeSchemaSuffix = nameSplitByDot[nameSplitByDot.length - 2]
 
   const schemaKey = schemaKeys.find((key) => {
     const folderKey = folders.find((folder) => {
+      const folderNameWithoutMetaInformation = folder.split('@')[0]
       const schemaKey = schemaKeys
         .find((key) => {
-          return folder.includes(key.split('.')[0])
+          const typeFromInstanceFileFirstDotNamePart = key.split('.')[0]
+          return folderNameWithoutMetaInformation.includes(typeFromInstanceFileFirstDotNamePart)
         })
         ?.split('.')[0]
 
-      return folder.includes(schemaKey || 'not found')
+      return folderNameWithoutMetaInformation.includes(schemaKey || 'not found')
     })
-    const removedPlural = folderKey?.slice(0, -1) || 'not found'
+    const removedPlural = folderKey?.split('@')[0].slice(0, -1) || 'not found'
     return key.includes(removedPlural) && key.includes(fileTypeSchemaSuffix)
   })
 
-  if (schemaKey) {
+  const uiSchemaKey = uiSchemaKeys.find((key) => {
+    const folderKey = folders.find((folder) => {
+      const folderNameWithoutMetaInformation = folder.split('@')[0]
+
+      const schemaKey = schemaKeys
+        .find((key) => {
+          const typeFromInstanceFileFirstDotNamePart = key.split('.')[0]
+          return folderNameWithoutMetaInformation.includes(typeFromInstanceFileFirstDotNamePart)
+        })
+        ?.split('.')[0]
+
+      return folderNameWithoutMetaInformation.includes(schemaKey || 'not found')
+    })
+    const removedPlural = folderKey?.split('@')[0].slice(0, -1) || 'not found'
+    return key.includes(removedPlural) && key.includes(fileTypeSchemaSuffix)
+  })
+
+  if (schemaKey && uiSchemaKey) {
     return {
       schemaName: schemaKey,
       fullFolderPath: 'NOT IMPLEMENTED YET',
-      referenceData: schemasDict[schemaKey]
+      referenceData: schemasDict[schemaKey],
+      uiSchemaData: uiSchemasDict[uiSchemaKey]
     }
   }
 
   return {
     schemaName: 'Not Found',
     fullFolderPath: 'NOT IMPLEMENTED YET',
-    referenceData: schemasDict[0]
+    referenceData: schemasDict[0],
+    uiSchemaData: uiSchemasDict[0]
   } // fallback
 }
 
@@ -292,7 +331,8 @@ function newChildFileNode(
   instanceData: any,
   schemaName: string,
   schemaPath: string,
-  schemaData: RJSFSchema
+  schemaData: RJSFSchema,
+  uiSchemaData: UiSchema
 ): ExtendedNodeData {
   return {
     _id: _theID,
@@ -302,11 +342,11 @@ function newChildFileNode(
       isFolder: false,
       fullFolderPath: path,
       instanceData: instanceData,
-      uiSchema: {},
       jsonSchema: {
         schemaName: schemaName,
         fullFolderPath: schemaPath,
-        referenceData: schemaData
+        referenceData: schemaData,
+        uiSchemaData: uiSchemaData
       }
     }
   }
@@ -322,11 +362,11 @@ function newChildFolderNode(_theID: number, folderName: string, path: string): E
     customDataHolder: {
       isFolder: true,
       fullFolderPath: path,
-      uiSchema: {},
       jsonSchema: {
         schemaName: '',
         fullFolderPath: '',
-        referenceData: {}
+        referenceData: {},
+        uiSchemaData: {}
       }
     }
   }

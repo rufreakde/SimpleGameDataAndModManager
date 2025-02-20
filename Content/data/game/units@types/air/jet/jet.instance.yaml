@@ -3,7 +3,7 @@ Path: .\Content\data\game\units\air\jet
 Name: Jet
 ProductionClass: Air
 LuckModifier: 10
-Armor: MediumVehicle
+Armor: LightVehicle
 ArmorModifier: 0
 PrimaryWeapon:
   BaseDamage: 5
